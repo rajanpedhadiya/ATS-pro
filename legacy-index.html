@@ -1,0 +1,2493 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ATS Pro – Smart Resume Analyzer & Recruitment System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+    <style>
+        /* ═══════════════════════════════════════
+   RESET + ROOT VARIABLES
+═══════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #060a14;
+            --bg2: #0c1422;
+            --bg3: #111c30;
+            --surface: rgba(255, 255, 255, .04);
+            --surface2: rgba(255, 255, 255, .07);
+            --border: rgba(255, 255, 255, .08);
+            --border2: rgba(255, 255, 255, .14);
+            --cyan: #00d4ff;
+            --cyan2: rgba(0, 212, 255, .12);
+            --violet: #7c3aed;
+            --violetl: #a855f7;
+            --violetd: rgba(124, 58, 237, .15);
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+            --pink: #f472b6;
+            --text: #dde6f3;
+            --textm: #64748b;
+            --textd: #94a3b8;
+            --fh: 'Syne', sans-serif;
+            --fb: 'Plus Jakarta Sans', sans-serif;
+            --fm: 'JetBrains Mono', monospace;
+            --r: 14px;
+            --rs: 10px;
+            --rl: 22px;
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: var(--fb);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .12);
+            border-radius: 3px
+        }
+
+        /* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg)
+            }
+
+            40% {
+                transform: translateY(-20px) rotate(1.5deg)
+            }
+
+            70% {
+                transform: translateY(-9px) rotate(-1deg)
+            }
+        }
+
+        @keyframes orb {
+
+            0%,
+            100% {
+                opacity: .35;
+                transform: scale(1)
+            }
+
+            50% {
+                opacity: .62;
+                transform: scale(1.08)
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(22px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 212, 255, .2)
+            }
+
+            50% {
+                box-shadow: 0 0 44px rgba(0, 212, 255, .5)
+            }
+        }
+
+        @keyframes typeDot {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+                opacity: .3
+            }
+
+            40% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+
+        @keyframes scanLine {
+            0% {
+                top: -10px;
+                opacity: 0
+            }
+
+            20% {
+                opacity: .6
+            }
+
+            100% {
+                top: 110%;
+                opacity: 0
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -400% center
+            }
+
+            100% {
+                background-position: 400% center
+            }
+        }
+
+        .fade-in {
+            animation: fadeUp .5s ease both
+        }
+
+        .fade2 {
+            animation: fadeUp .5s .12s ease both
+        }
+
+        .fade3 {
+            animation: fadeUp .5s .22s ease both
+        }
+
+        .fade4 {
+            animation: fadeUp .5s .32s ease both
+        }
+
+        /* ═══════════════════════════════════════
+   LAYOUT UTILITIES
+═══════════════════════════════════════ */
+        .page {
+            display: none;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 96px 24px 64px;
+            animation: fadeUp .4s ease
+        }
+
+        .page.active {
+            display: block
+        }
+
+        .flex {
+            display: flex;
+            align-items: center
+        }
+
+        .flex-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+            gap: 12px
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px
+        }
+
+        .grid4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+            gap: 14px
+        }
+
+        .text-center {
+            text-align: center
+        }
+
+        .mt8 {
+            margin-top: 8px
+        }
+
+        .mt12 {
+            margin-top: 12px
+        }
+
+        .mt16 {
+            margin-top: 16px
+        }
+
+        .mt20 {
+            margin-top: 20px
+        }
+
+        .mt28 {
+            margin-top: 28px
+        }
+
+        .mt36 {
+            margin-top: 36px
+        }
+
+        .mt48 {
+            margin-top: 48px
+        }
+
+        .mb8 {
+            margin-bottom: 8px
+        }
+
+        .mb12 {
+            margin-bottom: 12px
+        }
+
+        .mb16 {
+            margin-bottom: 16px
+        }
+
+        .mb20 {
+            margin-bottom: 20px
+        }
+
+        .mb28 {
+            margin-bottom: 28px
+        }
+
+        .mb36 {
+            margin-bottom: 36px
+        }
+
+        /* ═══════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════ */
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+            border-radius: var(--r)
+        }
+
+        .glass2 {
+            background: var(--surface2);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border2);
+            border-radius: var(--r)
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 24px;
+            transition: all .25s ease
+        }
+
+        .card:hover {
+            border-color: var(--border2);
+            background: var(--surface2);
+            transform: translateY(-2px)
+        }
+
+        .card-flat {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 26px;
+            border-radius: var(--rs);
+            font-family: var(--fb);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all .2s ease;
+            border: none;
+            letter-spacing: .2px;
+            text-decoration: none
+        }
+
+        .btn-p {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--violetl) 100%);
+            color: #050811
+        }
+
+        .btn-p:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0, 212, 255, .35)
+        }
+
+        .btn-g {
+            background: transparent;
+            color: var(--textd);
+            border: 1px solid var(--border2);
+            font-family: var(--fb);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 11px 26px;
+            border-radius: var(--rs);
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn-g:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: var(--cyan2)
+        }
+
+        .btn-v {
+            background: linear-gradient(135deg, var(--violet) 0%, var(--violetl) 100%);
+            color: #fff;
+            border: none;
+            font-family: var(--fb);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 11px 26px;
+            border-radius: var(--rs);
+            transition: all .2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .btn-v:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(124, 58, 237, .4)
+        }
+
+        .btn:disabled,
+        .btn-p:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important
+        }
+
+        .btn-sm {
+            padding: 7px 16px;
+            font-size: 12px
+        }
+
+        .btn-lg {
+            padding: 15px 36px;
+            font-size: 16px
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600
+        }
+
+        .bc {
+            background: var(--cyan2);
+            border: 1px solid rgba(0, 212, 255, .25);
+            color: var(--cyan)
+        }
+
+        .bv {
+            background: var(--violetd);
+            border: 1px solid rgba(124, 58, 237, .25);
+            color: var(--violetl)
+        }
+
+        .be {
+            background: rgba(16, 185, 129, .1);
+            border: 1px solid rgba(16, 185, 129, .25);
+            color: var(--emerald)
+        }
+
+        .ba {
+            background: rgba(245, 158, 11, .1);
+            border: 1px solid rgba(245, 158, 11, .25);
+            color: var(--amber)
+        }
+
+        .br {
+            background: rgba(244, 63, 94, .1);
+            border: 1px solid rgba(244, 63, 94, .25);
+            color: var(--rose)
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            margin-bottom: 12px
+        }
+
+        .section-title {
+            font-family: var(--fh);
+            font-size: clamp(26px, 4vw, 42px);
+            font-weight: 800;
+            line-height: 1.12;
+            color: var(--text)
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--violetl) 70%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text
+        }
+
+        .mono {
+            font-family: var(--fm)
+        }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, .07);
+            overflow: hidden;
+            width: 100%
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--violetl));
+            transition: width 1.2s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 28px 0
+        }
+
+        input,
+        textarea,
+        select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--rs);
+            padding: 12px 16px;
+            font-family: var(--fb);
+            font-size: 14px;
+            width: 100%;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            resize: vertical;
+            line-height: 1.6
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, .08)
+        }
+
+        ::placeholder {
+            color: var(--textm)
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .table th {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--textm);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: left
+        }
+
+        .table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+            font-size: 14px;
+            color: var(--textd)
+        }
+
+        .table tr:hover td {
+            background: rgba(255, 255, 255, .025)
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, .2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: inline-block
+        }
+
+        /* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+        #nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all .3s ease;
+            border-bottom: 1px solid transparent
+        }
+
+        #nav.scrolled {
+            background: rgba(6, 10, 20, .92);
+            backdrop-filter: blur(20px);
+            border-bottom-color: var(--border)
+        }
+
+        .nav-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            height: 68px;
+            gap: 8px
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: none
+        }
+
+        .nav-logo-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--cyan), var(--violetl));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #050811;
+            font-weight: 800;
+            font-family: var(--fm);
+            flex-shrink: 0
+        }
+
+        .nav-logo-text {
+            font-family: var(--fh);
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--text)
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+            align-items: center;
+            flex-wrap: wrap
+        }
+
+        .nav-link {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--textd);
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: var(--fb);
+            transition: all .15s ease;
+            font-weight: 400
+        }
+
+        .nav-link:hover {
+            color: var(--text)
+        }
+
+        .nav-link.active {
+            background: var(--cyan2);
+            border-color: rgba(0, 212, 255, .2);
+            color: var(--cyan);
+            font-weight: 600
+        }
+
+        .nav-cta {
+            margin-left: 12px;
+            padding: 8px 20px;
+            font-size: 13px
+        }
+
+        /* ═══════════════════════════════════════
+   HOME PAGE
+═══════════════════════════════════════ */
+        #page-home {
+            padding: 0;
+            max-width: 100%;
+            display: none
+        }
+
+        #page-home.active {
+            display: block
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            pointer-events: none
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            animation: orb 6s ease-in-out infinite
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 212, 255, .12) 0%, transparent 70%);
+            top: -150px;
+            left: -100px
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(124, 58, 237, .15) 0%, transparent 70%);
+            bottom: -100px;
+            right: -80px;
+            animation-delay: 2s;
+            animation-duration: 8s
+        }
+
+        .orb3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(16, 185, 129, .08) 0%, transparent 70%);
+            top: 40%;
+            right: 20%;
+            animation-delay: 1s;
+            animation-duration: 7s
+        }
+
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            opacity: .04
+        }
+
+        .hero-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 48px;
+            align-items: center
+        }
+
+        .hero-content {
+            max-width: 700px
+        }
+
+        .hero-card {
+            animation: float 5s ease-in-out infinite;
+            width: 300px
+        }
+
+        @media(max-width:900px) {
+            .hero-inner {
+                grid-template-columns: 1fr
+            }
+
+            .hero-card {
+                display: none
+            }
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column
+        }
+
+        .stat-val {
+            font-family: var(--fm);
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--cyan);
+            line-height: 1
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--textm);
+            margin-top: 6px
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 56px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap
+        }
+
+        .features-section {
+            background: var(--bg2);
+            padding: 80px 0
+        }
+
+        .feature-card {
+            cursor: pointer;
+            border-top-width: 2px;
+            border-top-style: solid
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 16px
+        }
+
+        .feature-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px
+        }
+
+        .feature-card p {
+            font-size: 13.5px;
+            color: var(--textd);
+            line-height: 1.65
+        }
+
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden
+        }
+
+        .cta-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 212, 255, .06) 0%, transparent 70%);
+            pointer-events: none
+        }
+
+        .cta-inner {
+            position: relative;
+            max-width: 580px;
+            margin: 0 auto;
+            padding: 0 24px
+        }
+
+        /* ═══════════════════════════════════════
+   ANALYZER PAGE
+═══════════════════════════════════════ */
+        .upload-zone {
+            border: 2px dashed var(--border2);
+            border-radius: var(--r);
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all .2s ease;
+            position: relative;
+            overflow: hidden
+        }
+
+        .upload-zone:hover {
+            border-color: var(--cyan);
+            background: var(--cyan2)
+        }
+
+        .upload-zone.drag-over {
+            border-color: var(--cyan);
+            background: var(--cyan2);
+            transform: scale(1.01)
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: var(--textm);
+            margin-top: 8px
+        }
+
+        .error-box {
+            background: rgba(244, 63, 94, .08);
+            border: 1px solid rgba(244, 63, 94, .25);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--rose);
+            font-size: 14px;
+            margin-bottom: 16px
+        }
+
+        /* ═══════════════════════════════════════
+   RESULTS PAGE
+═══════════════════════════════════════ */
+        .score-circle-wrap {
+            padding: 32px;
+            text-align: center;
+            min-width: 200px
+        }
+
+        .score-big {
+            font-family: var(--fm);
+            font-size: 72px;
+            font-weight: 700;
+            line-height: 1
+        }
+
+        .results-header-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 24px;
+            align-items: start;
+            margin-bottom: 28px
+        }
+
+        @media(max-width:640px) {
+            .results-header-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .suggestion-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px 16px;
+            background: var(--cyan2);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, .12);
+            margin-bottom: 10px
+        }
+
+        .suggestion-tag {
+            background: var(--cyan);
+            color: #050811;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            height: fit-content;
+            margin-top: 2px;
+            flex-shrink: 0
+        }
+
+        .keyword-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .strength-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: flex-start
+        }
+
+        .strength-dot {
+            font-size: 16px;
+            margin-top: 1px;
+            flex-shrink: 0
+        }
+
+        /* ═══════════════════════════════════════
+   CHAT PAGE
+═══════════════════════════════════════ */
+        #page-chat {
+            padding: 96px 24px 24px;
+            display: none;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100vh
+        }
+
+        #page-chat.active {
+            display: flex
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 4px;
+            margin-bottom: 16px
+        }
+
+        .chat-msg {
+            display: flex;
+            animation: fadeUp .3s ease
+        }
+
+        .chat-msg.user {
+            justify-content: flex-end
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--cyan), var(--violetl));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #050811;
+            font-weight: 800;
+            font-family: var(--fm);
+            margin-right: 10px;
+            flex-shrink: 0;
+            margin-top: 4px
+        }
+
+        .chat-bubble {
+            max-width: 78%;
+            padding: 14px 18px;
+            font-size: 14px;
+            line-height: 1.7
+        }
+
+        .chat-bubble.ai {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 4px 18px 18px 18px;
+            color: var(--text)
+        }
+
+        .chat-bubble.user {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--violetl) 100%);
+            color: #050811;
+            font-weight: 500;
+            border-radius: 18px 18px 4px 18px
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            padding: 14px 20px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 4px 18px 18px 18px
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: typeDot 1.4s infinite ease-in-out both
+        }
+
+        .quick-btns {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 10px
+        }
+
+        .chat-input {
+            flex: 1;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 14px
+        }
+
+        .chat-send {
+            padding: 14px 24px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            font-size: 16px
+        }
+
+        /* ═══════════════════════════════════════
+   DASHBOARD COMMON
+═══════════════════════════════════════ */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all .25s ease
+        }
+
+        .stat-card:hover {
+            border-color: var(--border2);
+            background: var(--surface2)
+        }
+
+        .stat-icon {
+            font-size: 26px;
+            flex-shrink: 0
+        }
+
+        .stat-num {
+            font-family: var(--fm);
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1
+        }
+
+        .stat-lbl {
+            font-size: 12px;
+            color: var(--textm);
+            margin-top: 4px
+        }
+
+        /* ═══════════════════════════════════════
+   RECRUITER TABLE
+═══════════════════════════════════════ */
+        .candidate-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--violetl) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #050811;
+            flex-shrink: 0
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap
+        }
+
+        .filter-tab {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--textm);
+            font-family: var(--fb);
+            transition: all .15s ease;
+            font-weight: 500
+        }
+
+        .filter-tab.active,
+        .filter-tab:hover {
+            background: var(--cyan2);
+            border-color: rgba(0, 212, 255, .3);
+            color: var(--cyan)
+        }
+
+        .pipeline-row {
+            margin-bottom: 10px
+        }
+
+        .pipeline-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 5px
+        }
+
+        /* ═══════════════════════════════════════
+   CHART WRAPPERS
+═══════════════════════════════════════ */
+        .chart-wrap {
+            position: relative;
+            width: 100%
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════ NAVIGATION ═══════════ -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <button class="nav-logo" onclick="showPage('home')">
+                <div class="nav-logo-icon">A</div>
+                <span class="nav-logo-text">ATS<span style="color:var(--cyan)">Pro</span></span>
+            </button>
+            <div class="nav-links">
+                <button class="nav-link active" onclick="showPage('home')">Home</button>
+                <button class="nav-link" onclick="showPage('analyzer')">Analyze Resume</button>
+                <button class="nav-link" onclick="showPage('chat')">AI Assistant</button>
+                <button class="nav-link" onclick="showPage('student')">My Dashboard</button>
+                <button class="nav-link" onclick="showPage('recruiter')">Recruiter</button>
+                <button class="btn btn-p nav-cta" onclick="showPage('analyzer')">✦ Analyze Now</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════ HOME PAGE ═══════════ -->
+    <div id="page-home" class="page active">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-bg">
+                <div class="orb orb1"></div>
+                <div class="orb orb2"></div>
+                <div class="orb orb3"></div>
+                <svg class="hero-grid" style="position:absolute;inset:0;width:100%;height:100%"
+                    preserveAspectRatio="none">
+                    <defs>
+                        <pattern id="g" width="60" height="60" patternUnits="userSpaceOnUse">
+                            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#fff" stroke-width=".5" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#g)" />
+                </svg>
+            </div>
+            <div class="hero-inner">
+                <div class="hero-content">
+                    <div class="badge bc fade-in" style="margin-bottom:24px">⚡ Powered by OpenRouter AI · v2.0</div>
+                    <h1 class="fade2"
+                        style="font-family:var(--fh);font-size:clamp(38px,7vw,76px);font-weight:800;line-height:1.08;margin-bottom:24px">
+                        Land Your Dream Job with <span class="gradient-text">AI Resume Intelligence</span>
+                    </h1>
+                    <p class="fade3"
+                        style="font-size:18px;color:var(--textd);line-height:1.7;margin-bottom:40px;max-width:580px">
+                        Beat ATS filters, match job descriptions, close skill gaps — all with one AI-powered platform
+                        trusted by thousands of job seekers and recruiters.
+                    </p>
+                    <div class="fade4" style="display:flex;gap:14px;flex-wrap:wrap">
+                        <button class="btn btn-p btn-lg" onclick="showPage('analyzer')">✦ Analyze My Resume</button>
+                        <button class="btn btn-g btn-lg" onclick="showPage('recruiter')">Recruiter Dashboard →</button>
+                    </div>
+                    <div class="hero-stats fade4">
+                        <div class="stat-item"><span class="stat-val">50K+</span><span class="stat-label">Resumes
+                                Analyzed</span></div>
+                        <div class="stat-item"><span class="stat-val">94%</span><span class="stat-label">Accuracy
+                                Rate</span></div>
+                        <div class="stat-item"><span class="stat-val">12K+</span><span class="stat-label">Jobs
+                                Matched</span></div>
+                        <div class="stat-item"><span class="stat-val">8.5×</span><span class="stat-label">Faster
+                                Hiring</span></div>
+                    </div>
+                </div>
+                <!-- Floating preview card -->
+                <div class="hero-card glass" style="padding:24px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                        <span style="font-size:13px;color:var(--textm);font-weight:500">ATS Score</span>
+                        <span class="badge be">LIVE RESULT</span>
+                    </div>
+                    <div style="text-align:center;margin-bottom:16px">
+                        <div class="mono" style="font-size:56px;font-weight:700;color:#10b981;line-height:1">87</div>
+                        <div style="font-size:13px;color:var(--textm);margin-top:4px">out of 100 · Excellent</div>
+                    </div>
+                    <div id="hero-bars">
+                        <div style="margin-bottom:10px">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                                <span style="color:var(--textd)">Keywords</span><span class="mono"
+                                    style="color:var(--cyan)">90%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:90%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                                <span style="color:var(--textd)">Formatting</span><span class="mono"
+                                    style="color:var(--cyan)">85%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:85%"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+                                <span style="color:var(--textd)">Skills Match</span><span class="mono"
+                                    style="color:var(--cyan)">78%</span></div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:78%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top:16px;padding:10px 12px;background:var(--cyan2);border-radius:8px;border:1px solid rgba(0,212,255,.15)">
+                        <div style="font-size:12px;color:var(--cyan);font-weight:500">✦ AI Suggestion</div>
+                        <div style="font-size:12px;color:var(--textd);margin-top:4px">Add "React.js" and "REST APIs" to
+                            strengthen your skills section</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features-section">
+            <div style="max-width:1180px;margin:0 auto;padding:0 24px">
+                <div style="text-align:center;margin-bottom:56px">
+                    <div class="section-label">FEATURES</div>
+                    <h2 class="section-title">Everything You Need to <span class="gradient-text">Get Hired</span></h2>
+                    <p
+                        style="color:var(--textd);margin-top:14px;font-size:16px;max-width:480px;margin-left:auto;margin-right:auto">
+                        A complete AI recruitment toolkit for job seekers and hiring teams</p>
+                </div>
+                <div class="grid3">
+                    <div class="card feature-card fade-in" style="border-top-color:rgba(0,212,255,.3)"
+                        onclick="showPage('analyzer')">
+                        <div class="feature-icon" style="background:rgba(0,212,255,.12)">⚡</div>
+                        <h3>ATS Score Engine</h3>
+                        <p>Get instant resume scores out of 100 with detailed keyword analysis and formatting feedback.
+                        </p>
+                    </div>
+                    <div class="card feature-card fade2" style="border-top-color:rgba(168,85,247,.3)"
+                        onclick="showPage('analyzer')">
+                        <div class="feature-icon" style="background:var(--violetd)">🎯</div>
+                        <h3>Job Match AI</h3>
+                        <p>Upload any job description and discover your exact match percentage with missing keywords.
+                        </p>
+                    </div>
+                    <div class="card feature-card fade3" style="border-top-color:rgba(16,185,129,.3)"
+                        onclick="showPage('analyzer')">
+                        <div class="feature-icon" style="background:rgba(16,185,129,.1)">🧠</div>
+                        <h3>Skill Gap Radar</h3>
+                        <p>Identify missing skills compared to your target role with personalized learning paths.</p>
+                    </div>
+                    <div class="card feature-card fade4" style="border-top-color:rgba(245,158,11,.3)"
+                        onclick="showPage('analyzer')">
+                        <div class="feature-icon" style="background:rgba(245,158,11,.1)">✍️</div>
+                        <h3>AI Resume Writer</h3>
+                        <p>Get AI-crafted improvements for every section — summary, experience, skills, and more.</p>
+                    </div>
+                    <div class="card feature-card fade-in" style="border-top-color:rgba(244,114,182,.3)"
+                        onclick="showPage('recruiter')">
+                        <div class="feature-icon" style="background:rgba(244,114,182,.1)">📊</div>
+                        <h3>Recruiter Dashboard</h3>
+                        <p>Auto-rank candidates, filter by skills, and shortlist the best profiles instantly.</p>
+                    </div>
+                    <div class="card feature-card fade2" style="border-top-color:rgba(124,58,237,.3)"
+                        onclick="showPage('chat')">
+                        <div class="feature-icon" style="background:var(--violetd)">💬</div>
+                        <h3>Career AI Chat</h3>
+                        <p>Ask anything about resumes, interviews, careers — your 24/7 AI career advisor.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta-section">
+            <div class="cta-bg"></div>
+            <div class="cta-inner">
+                <h2 style="font-family:var(--fh);font-size:clamp(28px,4vw,44px);font-weight:800;margin-bottom:16px">
+                    Ready to Beat the ATS?</h2>
+                <p style="color:var(--textd);font-size:16px;margin-bottom:36px;line-height:1.6">Upload your resume now
+                    and get a complete AI analysis in under 30 seconds</p>
+                <button class="btn btn-p btn-lg" style="animation:glowPulse 3s ease-in-out infinite"
+                    onclick="showPage('analyzer')">✦ Start Free Analysis</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- ═══════════ ANALYZER PAGE ═══════════ -->
+    <div id="page-analyzer" class="page">
+        <div style="max-width:820px;margin:0 auto">
+            <div class="section-label">RESUME ANALYZER</div>
+            <h1 class="section-title fade-in" style="margin-bottom:12px">AI-Powered <span class="gradient-text">Resume
+                    Analysis</span></h1>
+            <p class="fade2" style="color:var(--textd);font-size:16px;margin-bottom:48px;line-height:1.6">Paste or
+                upload your resume, optionally add a job description, and get an instant ATS score with actionable AI
+                feedback.</p>
+
+            <!-- Resume Input -->
+            <div class="card fade2 mb20">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+                    <h3 style="font-size:15px;font-weight:700">📄 Resume Content <span
+                            style="font-size:12px;color:var(--textm);font-weight:400">(required)</span></h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <button class="btn btn-g btn-sm" onclick="loadSampleResume()">📋 Load Sample</button>
+                        <button class="btn btn-g btn-sm" onclick="document.getElementById('fileInput').click()">↑ Upload
+                            File</button>
+                        <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" style="display:none"
+                            onchange="handleFileUpload(event)">
+                    </div>
+                </div>
+                <textarea id="resumeInput"
+                    placeholder="Paste your resume text here...&#10;&#10;Include: Contact info, Work experience, Education, Skills, Projects &amp; certifications"
+                    style="min-height:280px;font-size:13.5px;line-height:1.7" oninput="updateCharCount()"></textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+                    <span id="charCount" class="char-count">0 characters</span>
+                    <button
+                        style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:12px;font-family:var(--fb)"
+                        onclick="document.getElementById('resumeInput').value='';updateCharCount()">✕ Clear</button>
+                </div>
+            </div>
+
+            <!-- JD Input -->
+            <div class="card fade3 mb28">
+                <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">🎯 Job Description <span
+                        style="font-size:12px;color:var(--textm);font-weight:400">(Optional — for match %)</span></h3>
+                <textarea id="jdInput"
+                    placeholder="Paste the job description here to get a match percentage and missing keywords..."
+                    style="min-height:140px;font-size:13.5px;line-height:1.7"></textarea>
+            </div>
+
+            <!-- Error -->
+            <div id="analyzeError" class="error-box" style="display:none"></div>
+
+            <!-- Analyze Button -->
+            <button id="analyzeBtn" class="btn btn-p btn-full btn-lg" onclick="analyzeResume()">✦ Analyze Resume with
+                AI</button>
+            <p style="text-align:center;font-size:12px;color:var(--textm);margin-top:14px">🔒 Your resume data is not
+                stored. Analyzed securely in real-time.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════ RESULTS PAGE ═══════════ -->
+    <div id="page-results" class="page">
+        <div id="resultsContent">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- ═══════════ CHAT PAGE ═══════════ -->
+    <div id="page-chat" class="page">
+        <div class="section-label" style="margin-bottom:8px">AI CAREER COACH</div>
+        <h1 class="section-title" style="margin-bottom:24px;font-size:clamp(22px,3vw,32px)">Chat with <span
+                class="gradient-text">AI Assistant</span></h1>
+        <div id="chatMessages" class="chat-messages">
+            <!-- Initial message injected by JS -->
+        </div>
+        <div class="quick-btns">
+            <button class="btn btn-g btn-sm" onclick="sendQuick('How do I improve my ATS score?')">How to improve ATS
+                score?</button>
+            <button class="btn btn-g btn-sm" onclick="sendQuick('What skills are in demand for 2025?')">Top skills for
+                2025?</button>
+            <button class="btn btn-g btn-sm" onclick="sendQuick('How to prepare for technical interviews?')">Technical
+                interview tips</button>
+            <button class="btn btn-g btn-sm" onclick="sendQuick('Write a professional summary for a fresher')">Write my
+                summary</button>
+        </div>
+        <div class="chat-input-row">
+            <input class="chat-input" id="chatInput" type="text"
+                placeholder="Ask about resumes, interviews, careers, skills..."
+                onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn btn-p chat-send" id="chatSendBtn" onclick="sendChat()">→</button>
+        </div>
+    </div>
+
+    <!-- ═══════════ STUDENT DASHBOARD ═══════════ -->
+    <div id="page-student" class="page">
+        <div
+            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+            <div>
+                <div class="section-label">STUDENT DASHBOARD</div>
+                <h1 style="font-family:var(--fh);font-size:clamp(22px,3vw,34px);font-weight:800;margin-top:8px">Welcome
+                    back, <span class="gradient-text">Deepak</span> 👋</h1>
+                <p style="color:var(--textm);margin-top:8px;font-size:14px">B.Tech Cybersecurity · 3rd Year · Last
+                    analysis: May 18, 2026</p>
+            </div>
+            <button class="btn btn-p" onclick="showPage('analyzer')">✦ Analyze New Resume</button>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="grid4 mb28">
+            <div class="stat-card fade-in" style="border-top:2px solid rgba(16,185,129,.3)">
+                <div class="stat-icon">⚡</div>
+                <div>
+                    <div class="stat-num" style="color:var(--emerald)">84</div>
+                    <div class="stat-lbl">Latest ATS Score</div>
+                </div>
+            </div>
+            <div class="stat-card fade2" style="border-top:2px solid rgba(0,212,255,.3)">
+                <div class="stat-icon">📄</div>
+                <div>
+                    <div class="stat-num" style="color:var(--cyan)">6</div>
+                    <div class="stat-lbl">Resumes Analyzed</div>
+                </div>
+            </div>
+            <div class="stat-card fade3" style="border-top:2px solid rgba(168,85,247,.3)">
+                <div class="stat-icon">🎯</div>
+                <div>
+                    <div class="stat-num" style="color:var(--violetl)">23</div>
+                    <div class="stat-lbl">Job Matches</div>
+                </div>
+            </div>
+            <div class="stat-card fade4" style="border-top:2px solid rgba(245,158,11,.3)">
+                <div class="stat-icon">💪</div>
+                <div>
+                    <div class="stat-num" style="color:var(--amber)">78%</div>
+                    <div class="stat-lbl">Profile Strength</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid2 mb28">
+            <div class="card fade-in">
+                <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📈 ATS Score History</h3>
+                <p style="font-size:12px;color:var(--textm);margin-bottom:16px">+22 points improvement in 6 months</p>
+                <div class="chart-wrap" style="height:200px"><canvas id="scoreChart"></canvas></div>
+            </div>
+            <div class="card fade2">
+                <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">🔧 Skills Breakdown</h3>
+                <p style="font-size:12px;color:var(--textm);margin-bottom:16px">Based on your latest analysis</p>
+                <div class="chart-wrap" style="height:200px"><canvas id="skillsChart"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Recent Analyses -->
+        <div class="card fade3 mb28">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:20px">📋 Recent Analyses</h3>
+            <div style="overflow-x:auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Domain</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:600;color:var(--text)">Resume_v3.pdf</td>
+                            <td><span class="badge bc" style="font-size:11px">Cybersecurity</span></td>
+                            <td><span class="mono" style="color:#10b981;font-weight:700;font-size:15px">84</span></td>
+                            <td><span class="badge be" style="font-size:11px">Excellent</span></td>
+                            <td style="font-size:12px;color:var(--textm)">May 18, 2026</td>
+                            <td><button class="btn btn-g btn-sm" onclick="showPage('analyzer')">Re-analyze</button></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600;color:var(--text)">Resume_v2.pdf</td>
+                            <td><span class="badge bc" style="font-size:11px">Web Dev</span></td>
+                            <td><span class="mono" style="color:#f59e0b;font-weight:700;font-size:15px">76</span></td>
+                            <td><span class="badge ba" style="font-size:11px">Good</span></td>
+                            <td style="font-size:12px;color:var(--textm)">Apr 30, 2026</td>
+                            <td><button class="btn btn-g btn-sm" onclick="showPage('analyzer')">Re-analyze</button></td>
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600;color:var(--text)">Resume_v1.pdf</td>
+                            <td><span class="badge bc" style="font-size:11px">General</span></td>
+                            <td><span class="mono" style="color:#f43f5e;font-weight:700;font-size:15px">68</span></td>
+                            <td><span class="badge br" style="font-size:11px">Average</span></td>
+                            <td style="font-size:12px;color:var(--textm)">Apr 12, 2026</td>
+                            <td><button class="btn btn-g btn-sm" onclick="showPage('analyzer')">Re-analyze</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Saved Jobs -->
+        <div class="card fade4">
+            <h3 style="font-size:14px;font-weight:700;margin-bottom:20px">🔖 Saved Job Matches</h3>
+            <div style="display:flex;flex-direction:column;gap:12px">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap;gap:12px">
+                    <div>
+                        <div style="font-weight:600;font-size:14px">Penetration Tester Jr.</div>
+                        <div style="font-size:13px;color:var(--textm);margin-top:3px">CyberShield Co · Internship</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div style="text-align:right">
+                            <div class="mono" style="font-size:20px;font-weight:700;color:#10b981">92%</div>
+                            <div style="font-size:11px;color:var(--textm)">match</div>
+                        </div><button class="btn btn-g btn-sm">Apply →</button>
+                    </div>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap;gap:12px">
+                    <div>
+                        <div style="font-weight:600;font-size:14px">Security Analyst</div>
+                        <div style="font-size:13px;color:var(--textm);margin-top:3px">TechCorp India · Full-time</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div style="text-align:right">
+                            <div class="mono" style="font-size:20px;font-weight:700;color:#10b981">88%</div>
+                            <div style="font-size:11px;color:var(--textm)">match</div>
+                        </div><button class="btn btn-g btn-sm">Apply →</button>
+                    </div>
+                </div>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);flex-wrap:wrap;gap:12px">
+                    <div>
+                        <div style="font-weight:600;font-size:14px">React Developer</div>
+                        <div style="font-size:13px;color:var(--textm);margin-top:3px">StartupXYZ · Remote</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div style="text-align:right">
+                            <div class="mono" style="font-size:20px;font-weight:700;color:#f59e0b">79%</div>
+                            <div style="font-size:11px;color:var(--textm)">match</div>
+                        </div><button class="btn btn-g btn-sm">Apply →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ RECRUITER DASHBOARD ═══════════ -->
+    <div id="page-recruiter" class="page">
+        <div
+            style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+            <div>
+                <div class="section-label">RECRUITER DASHBOARD</div>
+                <h1 style="font-family:var(--fh);font-size:clamp(22px,3vw,34px);font-weight:800;margin-top:8px">
+                    Recruitment <span class="gradient-text">Command Center</span></h1>
+                <p style="color:var(--textm);margin-top:8px;font-size:14px">AI-ranked candidates · Auto skill matching ·
+                    Smart shortlisting</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-g btn-sm">+ Post Job</button>
+                <button class="btn btn-v btn-sm">↓ Export CSV</button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid4 mb28">
+            <div class="stat-card fade-in">
+                <div class="stat-icon">👥</div>
+                <div>
+                    <div class="stat-num" style="color:var(--cyan)">127</div>
+                    <div class="stat-lbl">Total Applicants</div>
+                </div>
+            </div>
+            <div class="stat-card fade2">
+                <div class="stat-icon">⭐</div>
+                <div>
+                    <div class="stat-num" style="color:var(--emerald)">34</div>
+                    <div class="stat-lbl">AI Shortlisted</div>
+                </div>
+            </div>
+            <div class="stat-card fade3">
+                <div class="stat-icon">📊</div>
+                <div>
+                    <div class="stat-num" style="color:var(--violetl)">74</div>
+                    <div class="stat-lbl">Avg ATS Score</div>
+                </div>
+            </div>
+            <div class="stat-card fade4">
+                <div class="stat-icon">💼</div>
+                <div>
+                    <div class="stat-num" style="color:var(--amber)">8</div>
+                    <div class="stat-lbl">Open Positions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid2 mb28">
+            <div class="card fade-in">
+                <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📊 Candidates by Domain</h3>
+                <p style="font-size:12px;color:var(--textm);margin-bottom:16px">AI-classified applicant pool</p>
+                <div class="chart-wrap" style="height:220px"><canvas id="domainChart"></canvas></div>
+            </div>
+            <div class="card fade2">
+                <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📈 Application Pipeline</h3>
+                <p style="font-size:12px;color:var(--textm);margin-bottom:16px">Candidate flow by stage</p>
+                <div id="pipelineChart">
+                    <div class="pipeline-row">
+                        <div class="pipeline-label"><span style="color:var(--textd)">Applied</span><span class="mono"
+                                style="color:#00d4ff">127</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:100%;background:#00d4ff"></div>
+                        </div>
+                    </div>
+                    <div class="pipeline-row">
+                        <div class="pipeline-label"><span style="color:var(--textd)">AI Screened</span><span
+                                class="mono" style="color:#a855f7">89</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:70%;background:#a855f7"></div>
+                        </div>
+                    </div>
+                    <div class="pipeline-row">
+                        <div class="pipeline-label"><span style="color:var(--textd)">Shortlisted</span><span
+                                class="mono" style="color:#10b981">34</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:27%;background:#10b981"></div>
+                        </div>
+                    </div>
+                    <div class="pipeline-row">
+                        <div class="pipeline-label"><span style="color:var(--textd)">Interview</span><span class="mono"
+                                style="color:#f59e0b">12</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:9%;background:#f59e0b"></div>
+                        </div>
+                    </div>
+                    <div class="pipeline-row">
+                        <div class="pipeline-label"><span style="color:var(--textd)">Hired</span><span class="mono"
+                                style="color:#f43f5e">4</span></div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:3%;background:#f43f5e"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Candidate Table -->
+        <div class="card fade3">
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+                <h3 style="font-size:14px;font-weight:700">🏆 AI-Ranked Candidates</h3>
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                    <input type="text" id="candidateSearch" placeholder="🔍 Search candidates..."
+                        style="width:200px;padding:8px 12px;font-size:13px" oninput="filterCandidates()">
+                    <div class="filter-tabs" id="filterTabs">
+                        <button class="filter-tab active" onclick="setFilter('All',this)">All</button>
+                        <button class="filter-tab" onclick="setFilter('Web Dev',this)">Web Dev</button>
+                        <button class="filter-tab" onclick="setFilter('AI/ML',this)">AI/ML</button>
+                        <button class="filter-tab" onclick="setFilter('Data Sci',this)">Data Sci</button>
+                        <button class="filter-tab" onclick="setFilter('Cybersec',this)">Cybersec</button>
+                        <button class="filter-tab" onclick="setFilter('Design',this)">Design</button>
+                    </div>
+                </div>
+            </div>
+            <div style="overflow-x:auto">
+                <table class="table" id="candidateTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Candidate</th>
+                            <th>Role</th>
+                            <th>Domain</th>
+                            <th>Exp</th>
+                            <th>ATS Score</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidateBody"></tbody>
+                </table>
+            </div>
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                <span id="candidateCount" style="font-size:13px;color:var(--textm)">Showing 6 of 6 candidates</span>
+                <div style="display:flex;gap:8px">
+                    <button class="btn btn-g btn-sm"
+                        style="background:var(--cyan2);border-color:rgba(0,212,255,.3);color:var(--cyan)">1</button>
+                    <button class="btn btn-g btn-sm">2</button>
+                    <button class="btn btn-g btn-sm">3</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ MAIN JAVASCRIPT ═══════════ -->
+    <script>
+        // ──────────────────────────────────────────
+        // STATE
+        // ──────────────────────────────────────────
+        let currentPage = 'home';
+        let analysisResult = null;
+        let chatHistory = [];
+        let activeFilter = 'All';
+        let scoreChartInstance = null;
+        let skillsChartInstance = null;
+        let domainChartInstance = null;
+        let radarChartInstance = null;
+        let breakdownChartInstance = null;
+
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        // ──────────────────────────────────────────
+        // NAVIGATION
+        // ──────────────────────────────────────────
+        function showPage(page) {
+            if (page === 'home') return;
+            const pageMap = {
+                analyzer: 'analyzer.html',
+                results: 'results.html',
+                chat: 'chat.html',
+                student: 'dashboard.html',
+                recruiter: 'recruiter.html'
+            };
+            window.location.href = pageMap[page] || 'index.html';
+        }
+
+        function getNavLabel(page) {
+            const map = { home: 'home', analyzer: 'analyze', results: 'analyze', chat: 'assistant', student: 'dashboard', recruiter: 'recruiter' };
+            return map[page] || page;
+        }
+
+        // Scroll effect on nav
+        window.addEventListener('scroll', () => {
+            document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+        });
+
+        // ──────────────────────────────────────────
+        // API HELPER
+        // ──────────────────────────────────────────
+        // Security note: Move API key to backend before production deployment.
+        const OPENROUTER_API_KEY = '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';
+        const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
+        const OPENROUTER_MODEL = 'deepseek/deepseek-v4-flash:free';
+
+        async function callAI(messages, system) {
+            const safeMessages = Array.isArray(messages) ? messages : [];
+            const payload = {
+                model: OPENROUTER_MODEL,
+                messages: [
+                    { role: 'system', content: system || '' },
+                    ...safeMessages
+                ]
+            };
+
+            try {
+                const response = await fetch(OPENROUTER_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'ATS Pro'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    console.log('OpenRouter API response parse failure:', parseError);
+                    throw new Error('OpenRouter returned an unreadable response.');
+                }
+
+                console.log('OpenRouter API response:', data);
+
+                if (!response.ok) {
+                    const apiMessage = data?.error?.message || data?.error?.metadata?.raw || data?.error?.type || response.statusText || 'Unknown API error';
+                    if (response.status === 401 || response.status === 403) {
+                        throw new Error(`OpenRouter API key rejected: ${apiMessage}`);
+                    }
+                    if (response.status === 429) {
+                        throw new Error(`OpenRouter rate limit reached: ${apiMessage}`);
+                    }
+                    throw new Error(`OpenRouter request failed (${response.status}): ${apiMessage}`);
+                }
+
+                const text = data?.choices?.[0]?.message?.content || '';
+                if (!text.trim()) {
+                    throw new Error('OpenRouter returned an empty response.');
+                }
+
+                return text;
+            } catch (error) {
+                console.error('OpenRouter API error:', error);
+                if (error instanceof TypeError) {
+                    throw new Error('Network error while contacting OpenRouter. Please check your connection.');
+                }
+                throw error;
+            }
+        }
+
+        function showAnalyzerError(message) {
+            const errEl = document.getElementById('analyzeError');
+            if (!errEl) return;
+            errEl.textContent = '⚠ ' + message;
+            errEl.style.display = 'block';
+        }
+
+        function clearAnalyzerError() {
+            const errEl = document.getElementById('analyzeError');
+            if (!errEl) return;
+            errEl.style.display = 'none';
+            errEl.textContent = '';
+        }
+
+        async function extractTextFromFile(file) {
+            const fileName = file.name.toLowerCase();
+            const extension = fileName.split('.').pop();
+
+            if (extension === 'txt') {
+                return await file.text();
+            }
+
+            const arrayBuffer = await file.arrayBuffer();
+
+            if (extension === 'pdf') {
+                if (!window.pdfjsLib) {
+                    throw new Error('PDF parsing library failed to load.');
+                }
+
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const pages = [];
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const content = await page.getTextContent();
+                    const pageText = content.items.map(item => item.str).join(' ');
+                    pages.push(pageText);
+                }
+                return pages.join('\n\n').trim();
+            }
+
+            if (extension === 'docx') {
+                if (!window.mammoth) {
+                    throw new Error('DOCX parsing library failed to load.');
+                }
+
+                const result = await mammoth.extractRawText({ arrayBuffer });
+                return (result.value || '').trim();
+            }
+
+            if (extension === 'doc') {
+                try {
+                    const result = await mammoth.extractRawText({ arrayBuffer });
+                    const docText = (result.value || '').trim();
+                    if (docText) return docText;
+                } catch {
+                    // Legacy .doc files are not reliably parseable in-browser, so fall back to a text read.
+                }
+                return await file.text();
+            }
+
+            return await file.text();
+        }
+
+        // ──────────────────────────────────────────
+        // ANALYZER
+        // ──────────────────────────────────────────
+        const SAMPLE_RESUME = `DEEPAK SHARMA
+deepak.sharma@email.com | +91 9876543210 | GitHub: github.com/deepaksharma
+
+SUMMARY
+B.Tech Computer Science (Cybersecurity) student with hands-on experience in ethical hacking, penetration testing, and full-stack web development. Passionate about building secure applications.
+
+EDUCATION
+B.Tech Computer Science (Cybersecurity) | 2023-2027 | CGPA: 8.4/10
+ABC Engineering College, Madhya Pradesh
+
+SKILLS
+Languages: Python, JavaScript, C, C++, Bash
+Web: HTML, CSS, React.js, Node.js, Express.js, MongoDB
+Security: Kali Linux, Metasploit, Burp Suite, OWASP Top 10, Wireshark, Nmap
+Tools: Git, GitHub, Docker, VS Code, Postman
+Cloud: AWS basics, Netlify, Vercel
+
+EXPERIENCE
+Web Developer Intern | XYZ Tech Solutions | Jun-Aug 2024
+• Built React.js frontend for client portal, improved load time by 40%
+• Integrated RESTful APIs with Node.js/Express backend
+• Implemented JWT authentication and bcrypt password hashing
+
+Freelance Security Consultant | Remote | 2024-Present
+• Conducted penetration testing for 3 business websites using Burp Suite
+• Identified 12 critical vulnerabilities and created remediation reports
+
+PROJECTS
+Money Mitra Network (moneymitranetwork.store)
+• Full-stack online education platform with 45+ courses, Razorpay integration
+• Tech: React.js, Node.js, MongoDB, Google Sheets API
+
+MMN Code Platform - Competitive Programming Site
+• LeetCode-style platform with Monaco Editor, Firebase auth, leaderboards
+
+CERTIFICATIONS
+• Google Cybersecurity Certificate (2024)
+• AWS Cloud Practitioner Essentials
+• Ethical Hacking Essentials - EC-Council
+
+ACHIEVEMENTS
+• Top 10% HackerRank Python challenge
+• 5+ production web applications deployed`;
+
+        function loadSampleResume() {
+            document.getElementById('resumeInput').value = SAMPLE_RESUME;
+            updateCharCount();
+            clearAnalyzerError();
+        }
+
+        function updateCharCount() {
+            const len = document.getElementById('resumeInput').value.length;
+            document.getElementById('charCount').textContent = len + ' characters';
+        }
+
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await extractTextFromFile(file);
+                if (!text.trim()) {
+                    throw new Error('Could not extract text from the uploaded file.');
+                }
+                document.getElementById('resumeInput').value = text;
+                updateCharCount();
+                clearAnalyzerError();
+            } catch (error) {
+                showAnalyzerError(error.message || 'File upload failed.');
+            }
+        }
+
+        const analyzeSteps = ['Parsing resume...', 'Extracting skills & keywords...', 'Calculating ATS score...', 'Generating AI insights...'];
+
+        async function analyzeResume() {
+            const resumeText = document.getElementById('resumeInput').value.trim();
+            const jdText = document.getElementById('jdInput').value.trim();
+            const btn = document.getElementById('analyzeBtn');
+
+            clearAnalyzerError();
+            if (resumeText.length < 50) {
+                showAnalyzerError('Please paste at least 50 characters of resume content.');
+                return;
+            }
+
+            btn.disabled = true;
+            let stepIdx = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIdx < analyzeSteps.length) {
+                    btn.innerHTML = `<span class="spinner"></span> ${analyzeSteps[stepIdx++]}`;
+                }
+            }, 700);
+
+            const sys = `You are an expert ATS resume analyst. Return ONLY raw JSON (no markdown/backticks). Keep outputs concise to save tokens. Limit arrays to 3 items max:
+{
+  "atsScore": <integer 0-100>,
+  "name": "<name or Unknown>",
+  "email": "<email>",
+  "phone": "<phone>",
+  "domain": "<Web Development|Cybersecurity|Data Science|AI/ML|Marketing|HR|Design|DevOps|Finance|General>",
+  "experienceLevel": "<Fresher|Junior|Mid-Level|Senior>",
+  "yearsExp": "<e.g. 2 years>",
+  "skills": ["s1","s2","s3"],
+  "education": "<degree info>",
+  "strengths": ["s1","s2"],
+  "improvements": ["i1","i2"],
+  "suggestions": [{"section":"Skills","tip":"one short tip"}],
+  "keywords": ["k1","k2","k3"],
+  "missingKeywords": ["m1","m2"],
+  "jobMatch": <0-100 or null>,
+  "scoreBreakdown": {"keywords":<int>,"formatting":<int>,"experience":<int>,"education":<int>,"skills":<int>},
+  "summary": "<1-2 sentence brief analysis>",
+  "interviewTips": ["tip1","tip2"]
+}`;
+
+            try {
+                const userMsg = 'RESUME:\n' + resumeText + (jdText ? '\n\nJOB DESCRIPTION:\n' + jdText : '');
+                const raw = await callAI([{ role: 'user', content: userMsg }], sys);
+                clearInterval(stepInterval);
+
+                let result;
+                try {
+                    result = JSON.parse(raw);
+                } catch {
+                    const match = raw.match(/\{[\s\S]*\}/);
+                    if (match) result = JSON.parse(match[0]);
+                    else throw new Error('AI returned invalid data format.');
+                }
+
+                analysisResult = result;
+                renderResults(result);
+                showPage('results');
+            } catch (e) {
+                clearInterval(stepInterval);
+                showAnalyzerError(e.message || 'Analysis failed. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '✦ Analyze Resume with AI';
+            }
+        }
+
+        // ──────────────────────────────────────────
+        // RESULTS RENDERER
+        // ──────────────────────────────────────────
+        function scoreColor(s) {
+            return s >= 80 ? '#10b981' : s >= 60 ? '#f59e0b' : '#f43f5e';
+        }
+        function scoreLabel(s) {
+            return s >= 80 ? 'Excellent' : s >= 70 ? 'Good' : s >= 60 ? 'Average' : s >= 40 ? 'Needs Work' : 'Poor';
+        }
+        function makeBadge(text, cls) {
+            return `<span class="badge ${cls}" style="font-size:11px">${text}</span>`;
+        }
+
+        function renderResults(r) {
+            const sc = r.atsScore || 0;
+            const bd = r.scoreBreakdown || {};
+            const breakdown = [
+                { label: 'Keywords', val: bd.keywords || sc },
+                { label: 'Formatting', val: bd.formatting || Math.min(sc + 8, 100) },
+                { label: 'Experience', val: bd.experience || Math.max(sc - 10, 0) },
+                { label: 'Education', val: bd.education || Math.min(sc + 5, 100) },
+                { label: 'Skills', val: bd.skills || sc }
+            ];
+
+            const skillsHtml = (r.skills || []).map(s => `<span class="badge bc">${s}</span>`).join('');
+            const kwHtml = (r.keywords || []).map(k => `<span class="badge bv">${k}</span>`).join('');
+            const missingHtml = (r.missingKeywords || []).map(k => `<span class="badge br">+ ${k}</span>`).join('');
+            const strengthsHtml = (r.strengths || []).map(s => `<div class="strength-item"><span class="strength-dot" style="color:var(--emerald)">◉</span><span style="font-size:14px;color:var(--textd);line-height:1.5">${s}</span></div>`).join('');
+            const improvHtml = (r.improvements || []).map(s => `<div class="strength-item"><span class="strength-dot" style="color:var(--amber)">◎</span><span style="font-size:14px;color:var(--textd);line-height:1.5">${s}</span></div>`).join('');
+            const suggHtml = (r.suggestions || []).map(s => `<div class="suggestion-item"><div class="suggestion-tag">${s.section}</div><div style="font-size:14px;color:var(--textd);line-height:1.6">${s.tip}</div></div>`).join('');
+            const tipsHtml = (r.interviewTips || []).map((t, i) => `<div style="display:flex;gap:12px;margin-bottom:12px"><div class="mono" style="color:var(--violet);font-weight:600;min-width:24px">0${i + 1}</div><div style="font-size:14px;color:var(--textd);line-height:1.6">${t}</div></div>`).join('');
+            const breakdownBarsHtml = breakdown.map(item => `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--textd)">${item.label}</span><span class="mono" style="color:${scoreColor(item.val)}">${item.val}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${item.val}%;background:${scoreColor(item.val)}"></div></div></div>`).join('');
+
+            const contactInfo = [r.email && `✉ ${r.email}`, r.phone && `📞 ${r.phone}`, r.education && `🎓 ${r.education}`].filter(Boolean).map(i => `<span style="font-size:13px;color:var(--textm)">${i}</span>`).join('');
+
+            const jobMatchHtml = (r.jobMatch !== null && r.jobMatch !== undefined) ? `
+    <div class="card mb28 fade3" style="border:1px solid rgba(${r.jobMatch >= 70 ? '16,185,129' : r.jobMatch >= 50 ? '245,158,11' : '244,63,94'},.25)">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <div><h3 style="font-size:15px;font-weight:700;margin-bottom:8px">🎯 Job Description Match</h3><p style="font-size:13px;color:var(--textd)">Based on the job description you provided</p></div>
+        <div style="text-align:center"><div class="mono" style="font-size:48px;font-weight:700;color:${scoreColor(r.jobMatch)};line-height:1">${r.jobMatch}%</div><div style="font-size:12px;color:${scoreColor(r.jobMatch)};margin-top:4px">Match Score</div></div>
+      </div>
+      ${(r.missingKeywords || []).length > 0 ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)"><div style="font-size:13px;color:var(--textm);margin-bottom:10px">Missing Keywords to Add:</div><div class="keyword-cloud">${missingHtml}</div></div>` : ''}
+    </div>` : '';
+
+            document.getElementById('resultsContent').innerHTML = `
+    <button class="btn btn-g btn-sm mb36" onclick="showPage('analyzer')">← Back to Analyzer</button>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-label">ATS ANALYSIS COMPLETE</div>
+        <h1 style="font-family:var(--fh);font-size:clamp(24px,4vw,36px);font-weight:800;margin-top:8px">${r.name || 'Your Resume'}</h1>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          ${r.domain ? makeBadge(r.domain, 'bc') : ''}
+          ${r.experienceLevel ? makeBadge(r.experienceLevel, 'bv') : ''}
+          ${r.yearsExp ? makeBadge('⏱ ' + r.yearsExp, 'ba') : ''}
+        </div>
+      </div>
+      <button class="btn btn-g btn-sm" onclick="window.print()">↓ Download Report</button>
+    </div>
+
+    <!-- Score + Summary -->
+    <div class="results-header-grid mb28 fade-in">
+      <div class="glass2 score-circle-wrap">
+        <div style="font-size:12px;color:var(--textm);margin-bottom:12px;letter-spacing:1px">ATS SCORE</div>
+        <div class="score-big" style="color:${scoreColor(sc)}">${sc}</div>
+        <div style="font-size:13px;color:${scoreColor(sc)};margin-top:8px;font-weight:600">${scoreLabel(sc)}</div>
+        <div class="progress-bar" style="margin-top:16px"><div class="progress-fill" style="width:${sc}%;background:${scoreColor(sc)}"></div></div>
+        <div style="font-size:11px;color:var(--textm);margin-top:10px">out of 100</div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--textd)">📝 AI Summary</h3>
+        <p style="color:var(--text);line-height:1.75;font-size:14.5px">${r.summary || 'Analysis complete.'}</p>
+        <div style="margin-top:16px;display:flex;gap:20px;flex-wrap:wrap">${contactInfo}</div>
+      </div>
+    </div>
+
+    <!-- Score Breakdown + Radar -->
+    <div class="grid2 mb28 fade2">
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:20px">📊 Score Breakdown</h3>
+        ${breakdownBarsHtml}
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:8px">🕸 Skills Radar</h3>
+        <div class="chart-wrap" style="height:250px"><canvas id="radarChart"></canvas></div>
+      </div>
+    </div>
+
+    ${jobMatchHtml}
+
+    <!-- Skills + Keywords -->
+    <div class="grid2 mb28 fade3">
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">🔧 Detected Skills</h3>
+        <div class="keyword-cloud">${skillsHtml || '<span style="color:var(--textm);font-size:13px">No skills detected</span>'}</div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">🔑 ATS Keywords Found</h3>
+        <div class="keyword-cloud">${kwHtml || '<span style="color:var(--textm);font-size:13px">No keywords extracted</span>'}</div>
+      </div>
+    </div>
+
+    <!-- Strengths + Improvements -->
+    <div class="grid2 mb28 fade4">
+      <div class="card"><h3 style="font-size:14px;font-weight:700;margin-bottom:16px">✅ Strengths</h3>${strengthsHtml}</div>
+      <div class="card"><h3 style="font-size:14px;font-weight:700;margin-bottom:16px">⚠ Areas to Improve</h3>${improvHtml}</div>
+    </div>
+
+    <!-- Suggestions -->
+    ${suggHtml ? `<div class="card mb28 fade-in" style="border:1px solid rgba(0,212,255,.15)"><h3 style="font-size:15px;font-weight:700;margin-bottom:20px">✦ AI Improvement Suggestions</h3>${suggHtml}</div>` : ''}
+
+    <!-- Interview Tips -->
+    ${tipsHtml ? `<div class="card mb28 fade2"><h3 style="font-size:15px;font-weight:700;margin-bottom:16px">💡 Interview Preparation Tips</h3>${tipsHtml}</div>` : ''}
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:12px;margin-top:36px;flex-wrap:wrap">
+      <button class="btn btn-p" onclick="showPage('analyzer')">✦ Analyze Another Resume</button>
+      <button class="btn btn-g" onclick="showPage('chat')">💬 Ask AI Career Coach</button>
+      <button class="btn btn-g" onclick="showPage('student')">📊 View My Dashboard</button>
+    </div>
+  `;
+
+            // Init radar chart
+            setTimeout(() => {
+                const ctx = document.getElementById('radarChart');
+                if (!ctx) return;
+                if (radarChartInstance) radarChartInstance.destroy();
+                radarChartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: breakdown.map(b => b.label),
+                        datasets: [{
+                            label: 'Score',
+                            data: breakdown.map(b => b.val),
+                            borderColor: '#00d4ff',
+                            backgroundColor: 'rgba(0,212,255,0.12)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#00d4ff',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0, max: 100,
+                                ticks: { display: false },
+                                grid: { color: 'rgba(255,255,255,0.07)' },
+                                pointLabels: { color: '#64748b', font: { size: 11, family: "'Plus Jakarta Sans'" } },
+                                angleLines: { color: 'rgba(255,255,255,0.05)' }
+                            }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }, 100);
+        }
+
+        // ──────────────────────────────────────────
+        // CHAT
+        // ──────────────────────────────────────────
+        const CHAT_SYS = `You are an AI Career Coach. Give extremely concise, actionable advice on resumes & careers. Use brief bullet points. Max 100 words to save tokens.`;
+
+        function initChat() {
+            chatHistory = [];
+            const initMsg = '👋 Hi! I\'m your AI Career Coach. I can help you with:\n\n• Resume improvement tips\n• Interview preparation\n• Career path guidance\n• ATS optimization strategies\n• Job search advice\n\nWhat would you like help with today?';
+            appendChatMsg('assistant', initMsg);
+        }
+
+        function appendChatMsg(role, text) {
+            const msgs = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'chat-msg ' + (role === 'user' ? 'user' : '');
+
+            const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            if (role === 'assistant') {
+                div.innerHTML = `<div class="chat-avatar">A</div><div class="chat-bubble ai">${formatted}</div>`;
+            } else {
+                div.innerHTML = `<div class="chat-bubble user">${formatted}</div>`;
+            }
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function showTyping() {
+            const msgs = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'chat-msg';
+            div.id = 'typingIndicator';
+            div.innerHTML = `<div class="chat-avatar">A</div><div class="typing-dots"><div class="typing-dot" style="animation-delay:0s"></div><div class="typing-dot" style="animation-delay:.2s"></div><div class="typing-dot" style="animation-delay:.4s"></div></div>`;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        function removeTyping() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const btn = document.getElementById('chatSendBtn');
+            const text = input.value.trim();
+            if (!text || btn.disabled) return;
+
+            input.value = '';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="width:16px;height:16px"></span>';
+
+            appendChatMsg('user', text);
+            chatHistory.push({ role: 'user', content: text });
+            showTyping();
+
+            try {
+                const reply = await callAI(chatHistory, CHAT_SYS);
+                removeTyping();
+                chatHistory.push({ role: 'assistant', content: reply });
+                appendChatMsg('assistant', reply);
+            } catch (e) {
+                removeTyping();
+                appendChatMsg('assistant', `⚠ Sorry, an error occurred. ${e.message || 'Please try again.'}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '→';
+            }
+        }
+
+        function sendQuick(text) {
+            document.getElementById('chatInput').value = text;
+            sendChat();
+        }
+
+        // ──────────────────────────────────────────
+        // STUDENT CHARTS
+        // ──────────────────────────────────────────
+        const scoreHistory = [
+            { month: 'Jan', score: 62 }, { month: 'Feb', score: 68 },
+            { month: 'Mar', score: 71 }, { month: 'Apr', score: 75 },
+            { month: 'May', score: 79 }, { month: 'Jun', score: 84 }
+        ];
+        const skillsData = [
+            { skill: 'Keywords', value: 88 }, { skill: 'Formatting', value: 85 },
+            { skill: 'Experience', value: 70 }, { skill: 'Education', value: 90 },
+            { skill: 'Projects', value: 74 }, { skill: 'ATS Compat.', value: 82 }
+        ];
+
+        function initStudentCharts() {
+            setTimeout(() => {
+                // Line chart
+                const sc = document.getElementById('scoreChart');
+                if (sc) {
+                    if (scoreChartInstance) scoreChartInstance.destroy();
+                    scoreChartInstance = new Chart(sc, {
+                        type: 'line',
+                        data: {
+                            labels: scoreHistory.map(d => d.month),
+                            datasets: [{
+                                label: 'ATS Score',
+                                data: scoreHistory.map(d => d.score),
+                                borderColor: '#00d4ff',
+                                backgroundColor: 'rgba(0,212,255,0.08)',
+                                borderWidth: 2.5,
+                                pointBackgroundColor: '#00d4ff',
+                                pointRadius: 5,
+                                fill: true,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            scales: {
+                                x: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } },
+                                y: { min: 50, max: 100, ticks: { color: '#64748b', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Bar chart
+                const skc = document.getElementById('skillsChart');
+                if (skc) {
+                    if (skillsChartInstance) skillsChartInstance.destroy();
+                    skillsChartInstance = new Chart(skc, {
+                        type: 'bar',
+                        data: {
+                            labels: skillsData.map(d => d.skill),
+                            datasets: [{
+                                label: 'Score',
+                                data: skillsData.map(d => d.value),
+                                backgroundColor: skillsData.map((_, i) => i % 2 === 0 ? 'rgba(0,212,255,0.7)' : 'rgba(168,85,247,0.7)'),
+                                borderRadius: 4,
+                                borderSkipped: false
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            scales: {
+                                x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false }, border: { display: false } },
+                                y: { min: 0, max: 100, ticks: { color: '#64748b', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // ──────────────────────────────────────────
+        // RECRUITER
+        // ──────────────────────────────────────────
+        const candidates = [
+            { name: 'Priya Sharma', role: 'React Developer', score: 91, domain: 'Web Dev', exp: '3 yrs', status: 'Shortlisted' },
+            { name: 'Arjun Mehta', role: 'ML Engineer', score: 88, domain: 'AI/ML', exp: '2 yrs', status: 'Interview' },
+            { name: 'Sara Ali', role: 'UI/UX Designer', score: 84, domain: 'Design', exp: '4 yrs', status: 'Shortlisted' },
+            { name: 'Rahul Verma', role: 'Backend Dev', score: 79, domain: 'Web Dev', exp: '2 yrs', status: 'Under Review' },
+            { name: 'Deepa Nair', role: 'Data Scientist', score: 76, domain: 'Data Sci', exp: '1 yr', status: 'Applied' },
+            { name: 'Arun Kumar', role: 'DevOps Engineer', score: 72, domain: 'DevOps', exp: '3 yrs', status: 'Applied' }
+        ];
+        const domainData = [
+            { domain: 'Web Dev', count: 38 }, { domain: 'AI/ML', count: 24 },
+            { domain: 'Data Sci', count: 19 }, { domain: 'Cybersec', count: 12 },
+            { domain: 'Design', count: 17 }, { domain: 'DevOps', count: 10 }
+        ];
+
+        function initCandidateTable() {
+            renderCandidates(candidates);
+        }
+
+        function renderCandidates(list) {
+            const tbody = document.getElementById('candidateBody');
+            const count = document.getElementById('candidateCount');
+            if (!tbody) return;
+
+            tbody.innerHTML = list.map((c, i) => {
+                const initials = c.name.split(' ').map(n => n[0]).join('');
+                const statusCls = c.status === 'Shortlisted' ? 'be' : c.status === 'Interview' ? 'bc' : 'ba';
+                return `<tr>
+      <td class="mono" style="color:var(--textm);font-size:12px">#${String(i + 1).padStart(2, '0')}</td>
+      <td><div style="display:flex;align-items:center;gap:10px"><div class="candidate-avatar">${initials}</div><span style="font-weight:600;color:var(--text)">${c.name}</span></div></td>
+      <td style="font-size:13px">${c.role}</td>
+      <td><span class="badge bc" style="font-size:11px">${c.domain}</span></td>
+      <td style="font-size:13px;color:var(--textm)">${c.exp}</td>
+      <td><span class="mono" style="color:${scoreColor(c.score)};font-weight:700;font-size:16px">${c.score}</span></td>
+      <td><span class="badge ${statusCls}" style="font-size:11px">${c.status}</span></td>
+      <td><button class="btn btn-g btn-sm">View →</button></td>
+    </tr>`;
+            }).join('');
+
+            if (count) count.textContent = `Showing ${list.length} of ${candidates.length} candidates`;
+        }
+
+        function filterCandidates() {
+            const search = document.getElementById('candidateSearch').value.toLowerCase();
+            const filtered = candidates.filter(c => {
+                const matchDomain = activeFilter === 'All' || c.domain === activeFilter;
+                const matchSearch = !search || c.name.toLowerCase().includes(search) || c.role.toLowerCase().includes(search);
+                return matchDomain && matchSearch;
+            });
+            renderCandidates(filtered);
+        }
+
+        function setFilter(filter, el) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            filterCandidates();
+        }
+
+        function initDomainChart() {
+            setTimeout(() => {
+                const ctx = document.getElementById('domainChart');
+                if (!ctx) return;
+                if (domainChartInstance) domainChartInstance.destroy();
+                domainChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: domainData.map(d => d.domain),
+                        datasets: [{
+                            label: 'Candidates',
+                            data: domainData.map(d => d.count),
+                            backgroundColor: ['rgba(0,212,255,0.7)', 'rgba(168,85,247,0.7)', 'rgba(16,185,129,0.7)', 'rgba(245,158,11,0.7)', 'rgba(244,114,182,0.7)', 'rgba(124,58,237,0.7)'],
+                            borderRadius: 5,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { display: false }, border: { display: false } },
+                            y: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }, 100);
+        }
+
+        // ──────────────────────────────────────────
+        // INIT
+        // ──────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            showPage('home');
+        });
+    </script>
+</body>
+
+</html>

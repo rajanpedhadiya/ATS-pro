@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Jobs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/jobs.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/jobs.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+<body data-page="jobs">
+  <div id="navbarMount"></div>
+  <main id="page-jobs" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-label">AI JOB RECOMMENDATIONS</div>
+        <h1 style="font-family:var(--fh);font-size:clamp(22px,3vw,34px);font-weight:800;margin-top:8px">Find Your Next <span class="gradient-text">Opportunity</span> 🎯</h1>
+        <p style="color:var(--textm);margin-top:8px;font-size:14px">Personalized job recommendations based on your skills and experience</p>
+      </div>
+      <button class="btn btn-p" onclick="window.location.href='analyzer.html'">✦ Update Profile</button>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card mb28 fade-in">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+        <div>
+          <label style="display:block;font-size:12px;color:var(--textm);margin-bottom:8px;font-weight:600">Job Title / Keywords</label>
+          <input type="text" id="jobSearch" placeholder="React Developer, Python..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--textm);margin-bottom:8px;font-weight:600">Location</label>
+          <input type="text" id="jobLocation" placeholder="India, Remote..." style="width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px">
+        </div>
+        <div>
+          <label style="display:block;font-size:12px;color:var(--textm);margin-bottom:8px;font-weight:600">&nbsp;</label>
+          <button class="btn btn-p w100" onclick="window.ATSJobs.searchJobs()">🔍 Search Jobs</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-g btn-sm" onclick="window.ATSJobs.searchJobs('React Developer', 'India')">React Developer</button>
+        <button class="btn btn-g btn-sm" onclick="window.ATSJobs.searchJobs('Python Developer', 'India')">Python Developer</button>
+        <button class="btn btn-g btn-sm" onclick="window.ATSJobs.searchJobs('Full Stack Developer', 'Remote')">Full Stack</button>
+        <button class="btn btn-g btn-sm" onclick="window.ATSJobs.searchJobs('Data Scientist', 'India')">Data Scientist</button>
+        <button class="btn btn-g btn-sm" onclick="window.ATSJobs.searchJobs('UI/UX Designer', 'Remote')">UI/UX Designer</button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="jobsLoading" style="display:none;text-align:center;padding:48px 24px">
+      <div class="spinner" style="width:40px;height:40px;margin:0 auto 16px"></div>
+      <p style="color:var(--textm)">Finding perfect jobs for you...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="jobsError" style="display:none;margin-bottom:28px">
+      <div class="card" style="border-left:3px solid #f43f5e;background:rgba(244,63,94,0.05)">
+        <p style="color:#f43f5e;margin-bottom:12px;font-weight:600">⚠ Error Loading Jobs</p>
+        <p id="jobsErrorMessage" style="color:var(--textd);font-size:13px;margin-bottom:12px">Unable to fetch jobs. Please try again.</p>
+        <button class="btn btn-sm" style="background:#f43f5e;color:white" onclick="window.ATSJobs.retrySearch()">Retry</button>
+      </div>
+    </div>
+
+    <!-- Jobs Grid -->
+    <!-- Jobs Grid -->
+    <div id="jobsContainer" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:16px"></div>
+
+    <!-- Append Loader (Skeleton) -->
+    <div id="jobsAppendLoader" style="display:none;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:16px">
+      <!-- 3 Skeleton cards -->
+      <div class="job-skeleton"><div class="shimmer shimmer-title"></div><div class="shimmer shimmer-company"></div><div class="shimmer-badges"><div class="shimmer shimmer-badge"></div><div class="shimmer shimmer-badge"></div></div><div class="shimmer shimmer-desc"></div><div class="shimmer shimmer-desc short"></div></div>
+      <div class="job-skeleton"><div class="shimmer shimmer-title"></div><div class="shimmer shimmer-company"></div><div class="shimmer-badges"><div class="shimmer shimmer-badge"></div><div class="shimmer shimmer-badge"></div></div><div class="shimmer shimmer-desc"></div><div class="shimmer shimmer-desc short"></div></div>
+      <div class="job-skeleton"><div class="shimmer shimmer-title"></div><div class="shimmer shimmer-company"></div><div class="shimmer-badges"><div class="shimmer shimmer-badge"></div><div class="shimmer shimmer-badge"></div></div><div class="shimmer shimmer-desc"></div><div class="shimmer shimmer-desc short"></div></div>
+    </div>
+
+    <!-- Load More Button -->
+    <div style="text-align:center;margin-top:28px;margin-bottom:28px;display:none" id="loadMoreContainer">
+      <button id="loadMoreBtn" class="btn btn-g" onclick="window.ATSJobs.loadMore()" style="position:relative;">
+        <span class="btn-text">Load More Jobs ↓</span>
+      </button>
+    </div>
+
+    <!-- End of Results -->
+    <div id="endOfResults" class="end-of-results" style="display:none">
+      ✨ You've reached the end of the results. Try adjusting your search!
+    </div>
+
+    <!-- Empty State -->
+    <div id="jobsEmpty" style="display:none;text-align:center;padding:48px 24px">
+      <div style="font-size:48px;margin-bottom:16px">🔍</div>
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">No Jobs Found</h3>
+      <p style="color:var(--textm);margin-bottom:24px">Try different search terms or location</p>
+      <button class="btn btn-p" onclick="window.location.href='analyzer.html'">← Back to Analyzer</button>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="grid2 mb28 fade2" id="statsSection" style="display:none">
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">📊 Job Market Insights</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:var(--textm)">Average Salary Range</span>
+            <span class="mono" style="font-weight:600" id="avgSalary">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:var(--textm)">Most Common Role</span>
+            <span class="mono" style="font-weight:600" id="commonRole">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:var(--textm)">Top Location</span>
+            <span class="mono" style="font-weight:600" id="topLocation">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0">
+            <span style="color:var(--textm)">Remote Opportunities</span>
+            <span class="mono" style="font-weight:600" id="remoteCount">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:16px">💾 Saved & Favorites</h3>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--text)">Saved Jobs</span>
+            <span class="mono" style="font-size:16px;font-weight:700;color:var(--cyan)" id="savedCount">0</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg3);border-radius:8px">
+            <span style="color:var(--text)">Favorite Jobs</span>
+            <span class="mono" style="font-size:16px;font-weight:700;color:var(--violetl)" id="favoriteCount">0</span>
+          </div>
+          <button class="btn btn-g btn-sm w100" onclick="window.ATSJobs.viewSavedJobs()">View Saved →</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    #jobsContainer {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .job-card {
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .job-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+      box-shadow: 0 8px 24px rgba(0, 212, 255, 0.15);
+    }
+
+    .job-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .job-company {
+      font-size: 13px;
+      color: var(--textm);
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .job-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .job-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      border-radius: 4px;
+    }
+
+    .job-description {
+      font-size: 13px;
+      color: var(--textd);
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .job-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .job-actions button {
+      flex: 1;
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+  </style>
+</body>
+</html>

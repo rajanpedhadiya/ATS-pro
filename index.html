@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script>
+    (function () {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Smart Resume Analyzer & Recruitment System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/animations.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+
+<body data-page="home">
+  <!-- Navbar Injected Here (Preserved ID) -->
+  <div id="navbarMount"></div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="ats-hero">
+      <div class="ats-hero-bg">
+        <div class="ats-hero-grid"></div>
+        <div class="ats-hero-orb ats-orb-1"></div>
+        <div class="ats-hero-orb ats-orb-2"></div>
+      </div>
+
+      <div class="ats-container ats-hero-inner">
+        <div class="ats-hero-content animate-fade-up">
+          <div class="ats-hero-badge">
+            <span class="ats-badge-dot">●</span> Powered by Team BJP
+          </div>
+          <h1 class="ats-hero-title">
+            Land Your Dream Job with <br />
+            <span class="ats-gradient-text">AI Resume Intelligence</span>
+          </h1>
+          <p class="ats-hero-subtitle">
+            Beat ATS filters, match job descriptions, and close skill gaps — all with one AI-powered platform trusted by
+            thousands of job seekers.
+          </p>
+
+          <div class="ats-hero-actions">
+            <a href="analyzer.html" class="ats-btn ats-btn-primary animate-glow">
+              ✦ Analyze My Resume
+            </a>
+            <a href="recruiter.html" class="ats-btn ats-btn-secondary">
+              Recruiter Dashboard →
+            </a>
+          </div>
+
+          <!-- Live Stats (New) -->
+          <div class="ats-grid-auto mt-xl"
+            style="margin-top: var(--space-xl); border-top: 1px solid var(--border-light); padding-top: var(--space-md);">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: #ff4d6d;">50K+</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Resumes Analyzed</div>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: #00c6ff;">94%</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Accuracy Rate</div>
+            </div>
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: #10b981;">12K+</div>
+              <div style="font-size: 13px; color: var(--text-secondary);">Jobs Matched</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ats-hero-visual animate-scale-in delay-200">
+          <div class="ats-hero-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+              <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">ATS Score</span>
+              <span
+                style="font-size:11px; padding:4px 8px; background:rgba(16,185,129,0.1); color:#10b981; border-radius:12px; font-weight:700;">LIVE
+                RESULT</span>
+            </div>
+            <div class="text-center mb-md">
+              <div
+                style="font-family: var(--font-mono); font-size: 64px; font-weight: 800; color: #10b981; line-height: 1;">
+                87</div>
+              <div style="font-size: 13px; color: var(--text-tertiary); margin-top: 4px;">out of 100 · Excellent</div>
+            </div>
+
+            <div class="mb-sm">
+              <div
+                style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; font-weight:600;">
+                <span>Keywords</span><span style="color:#00c6ff;">90%</span>
+              </div>
+              <div style="width:100%; height:6px; background:var(--bg-tertiary); border-radius:3px; overflow:hidden;">
+                <div style="width:90%; height:100%; background:var(--primary-gradient);"></div>
+              </div>
+            </div>
+
+            <div class="mb-sm">
+              <div
+                style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px; font-weight:600;">
+                <span>Formatting</span><span style="color:#00c6ff;">85%</span>
+              </div>
+              <div style="width:100%; height:6px; background:var(--bg-tertiary); border-radius:3px; overflow:hidden;">
+                <div style="width:85%; height:100%; background:var(--secondary-gradient);"></div>
+              </div>
+            </div>
+
+            <div
+              style="margin-top:20px; padding:12px; background:rgba(0,198,255,0.05); border-radius:12px; border:1px solid rgba(0,198,255,0.2);">
+              <div style="font-size:12px; font-weight:700; color:#0072ff; margin-bottom:4px;">✦ AI Suggestion</div>
+              <div style="font-size:13px; color:var(--text-secondary);">Add "React.js" and "REST APIs" to strengthen
+                your skills section.</div>
+            </div>
+          </div>
+
+          <!-- Floating decorative badges -->
+          <div class="ats-floating-badge top-right">
+            <div class="ats-badge-icon green">✓</div>
+            <div>
+              <div style="font-size:12px; font-weight:700;">ATS Passed</div>
+              <div style="font-size:11px; color:var(--text-tertiary);">Ready to apply</div>
+            </div>
+          </div>
+
+          <div class="ats-floating-badge bottom-left">
+            <div class="ats-badge-icon blue">✦</div>
+            <div>
+              <div style="font-size:12px; font-weight:700;">AI Optimized</div>
+              <div style="font-size:11px; color:var(--text-tertiary);">Keywords matched</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trusted By Section -->
+    <section class="ats-marquee-container">
+      <div class="ats-marquee-content">
+        <!-- Duplicate for infinite scroll effect -->
+        <div style="display:inline-block;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Google">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Microsoft">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Amazon">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Netflix">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Y_Combinator_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Y Combinator">
+        </div>
+        <div style="display:inline-block;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Google">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Microsoft">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Amazon">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Netflix">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/b/b2/Y_Combinator_logo.svg" height="30"
+            class="ats-marquee-logo" alt="Y Combinator">
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="ats-section" style="background: var(--bg-tertiary);">
+      <div class="ats-container">
+        <div class="text-center mb-xl reveal-on-scroll">
+          <div class="ats-section-label">AI FEATURES</div>
+          <h2 class="ats-section-title">Everything You Need to <span class="ats-gradient-text-alt">Get Hired</span></h2>
+          <p class="ats-subtitle">A complete AI recruitment toolkit for job seekers and hiring teams.</p>
+        </div>
+
+        <div class="ats-grid-3">
+          <div class="ats-feature-card reveal-on-scroll delay-100">
+            <div class="ats-feature-icon-wrapper" style="color:#ff4d6d; background:rgba(255,77,109,0.1);">⚡</div>
+            <h3 class="ats-feature-title">ATS Score Engine</h3>
+            <p class="ats-feature-desc">Get instant resume scores out of 100 with detailed keyword analysis and
+              formatting feedback.</p>
+          </div>
+
+          <div class="ats-feature-card reveal-on-scroll delay-200">
+            <div class="ats-feature-icon-wrapper" style="color:#7c3aed; background:rgba(124,58,237,0.1);">🎯</div>
+            <h3 class="ats-feature-title">Job Match AI</h3>
+            <p class="ats-feature-desc">Upload any job description and discover your exact match percentage with missing
+              keywords.</p>
+          </div>
+
+          <div class="ats-feature-card reveal-on-scroll delay-300">
+            <div class="ats-feature-icon-wrapper" style="color:#10b981; background:rgba(16,185,129,0.1);">🧠</div>
+            <h3 class="ats-feature-title">Skill Gap Radar</h3>
+            <p class="ats-feature-desc">Identify missing skills compared to your target role with personalized learning
+              paths.</p>
+          </div>
+
+          <div class="ats-feature-card reveal-on-scroll delay-100">
+            <div class="ats-feature-icon-wrapper" style="color:#f59e0b; background:rgba(245,158,11,0.1);">✍️</div>
+            <h3 class="ats-feature-title">AI Resume Writer</h3>
+            <p class="ats-feature-desc">Get AI-crafted improvements for every section — summary, experience, skills, and
+              more.</p>
+          </div>
+
+          <div class="ats-feature-card reveal-on-scroll delay-200">
+            <div class="ats-feature-icon-wrapper" style="color:#f472b6; background:rgba(244,114,182,0.1);">📊</div>
+            <h3 class="ats-feature-title">Recruiter Dashboard</h3>
+            <p class="ats-feature-desc">Auto-rank candidates, filter by skills, and shortlist the best profiles
+              instantly.</p>
+          </div>
+
+          <div class="ats-feature-card reveal-on-scroll delay-300">
+            <div class="ats-feature-icon-wrapper" style="color:#00c6ff; background:rgba(0,198,255,0.1);">💬</div>
+            <h3 class="ats-feature-title">Career AI Chat</h3>
+            <p class="ats-feature-desc">Ask anything about resumes, interviews, careers — your 24/7 AI career advisor.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it Works / Timeline -->
+    <section class="ats-section">
+      <div class="ats-container">
+        <div class="text-center mb-xl reveal-on-scroll">
+          <div class="ats-section-label">HOW IT WORKS</div>
+          <h2 class="ats-section-title">Analyze in <span class="ats-gradient-text">3 Simple Steps</span></h2>
+        </div>
+
+        <div class="ats-timeline-wrapper">
+          <div class="ats-timeline-item reveal-on-scroll delay-100">
+            <div class="ats-timeline-number">1</div>
+            <div class="ats-timeline-content ats-card-premium" style="flex:1;">
+              <h3 style="font-family:var(--font-heading); font-size:20px; margin-bottom:8px;">Upload Your Resume</h3>
+              <p style="color:var(--text-secondary); font-size:15px;">Simply drag and drop your PDF or copy-paste your
+                resume text into our secure analyzer.</p>
+            </div>
+          </div>
+
+          <div class="ats-timeline-item reveal-on-scroll delay-200">
+            <div class="ats-timeline-number">2</div>
+            <div class="ats-timeline-content ats-card-premium" style="flex:1;">
+              <h3 style="font-family:var(--font-heading); font-size:20px; margin-bottom:8px;">Add Job Description
+                (Optional)</h3>
+              <p style="color:var(--text-secondary); font-size:15px;">Paste the description of the job you want to apply
+                for to get a precise keyword match analysis.</p>
+            </div>
+          </div>
+
+          <div class="ats-timeline-item reveal-on-scroll delay-300">
+            <div class="ats-timeline-number">3</div>
+            <div class="ats-timeline-content ats-card-premium" style="flex:1;">
+              <h3 style="font-family:var(--font-heading); font-size:20px; margin-bottom:8px;">Get AI Feedback</h3>
+              <p style="color:var(--text-secondary); font-size:15px;">Instantly receive your ATS score, missing
+                keywords, and AI-generated suggestions to improve your chances.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion -->
+    <section class="ats-section" style="background: var(--bg-tertiary);">
+      <div class="ats-container" style="max-width: 800px;">
+        <div class="text-center mb-xl reveal-on-scroll">
+          <div class="ats-section-label">FAQ</div>
+          <h2 class="ats-section-title">Common Questions</h2>
+        </div>
+
+        <div class="ats-card-premium reveal-on-scroll delay-100">
+          <div class="ats-faq-item active">
+            <button class="ats-faq-question" onclick="this.parentElement.classList.toggle('active')">
+              Is my resume data stored?
+              <span>+</span>
+            </button>
+            <div class="ats-faq-answer">
+              No. Your data is analyzed securely in real-time in your browser and is not stored on our servers.
+            </div>
+          </div>
+
+          <div class="ats-faq-item">
+            <button class="ats-faq-question" onclick="this.parentElement.classList.toggle('active')">
+              How accurate is the ATS scoring?
+              <span>+</span>
+            </button>
+            <div class="ats-faq-answer">
+              Our AI engine simulates top Enterprise ATS systems (like Workday and Taleo) using advanced NLP and Gemini
+              to ensure 94%+ accuracy.
+            </div>
+          </div>
+
+          <div class="ats-faq-item" style="border-bottom: none;">
+            <button class="ats-faq-question" onclick="this.parentElement.classList.toggle('active')">
+              Is this tool free?
+              <span>+</span>
+            </button>
+            <div class="ats-faq-answer">
+              Yes, the core resume analysis is completely free to use.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="ats-section text-center"
+      style="background: var(--bg-primary); position: relative; overflow: hidden;">
+      <div style="position:absolute; inset:0; background:var(--aurora-bg); opacity:0.5; z-index:0;"></div>
+      <div class="ats-container reveal-on-scroll" style="position:relative; z-index:1; padding: var(--space-xxl) 0;">
+        <h2 class="ats-section-title" style="font-size:clamp(32px, 5vw, 48px); margin-bottom:var(--space-md);">Ready to
+          Beat the ATS?</h2>
+        <p class="ats-subtitle mb-lg">Upload your resume now and get a complete AI analysis in under 30 seconds.</p>
+        <a href="analyzer.html" class="ats-btn ats-btn-primary ats-btn-lg animate-glow"
+          style="padding: 16px 40px; font-size: 18px;">
+          ✦ Start Free Analysis
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ats-footer">
+    <div class="ats-container">
+      <div class="ats-footer-grid">
+        <div class="ats-footer-brand">
+          <div class="ats-footer-logo">
+            <div class="ats-nav-logo-icon">A</div>
+            ATS Pro
+          </div>
+          <p class="ats-footer-desc">The most advanced AI resume analyzer and recruiter dashboard designed to bridge the
+            gap between talent and opportunity.</p>
+        </div>
+
+        <div>
+          <h4 class="ats-footer-title">Product</h4>
+          <ul class="ats-footer-links">
+            <li class="ats-footer-link"><a href="analyzer.html">Resume Analyzer</a></li>
+            <li class="ats-footer-link"><a href="recruiter.html">Recruiter Dashboard</a></li>
+            <li class="ats-footer-link"><a href="chat.html">AI Career Coach</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="ats-footer-title">Resources</h4>
+          <ul class="ats-footer-links">
+            <li class="ats-footer-link"><a href="#">Blog</a></li>
+            <li class="ats-footer-link"><a href="#">ATS Guide</a></li>
+            <li class="ats-footer-link"><a href="#">Resume Templates</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="ats-footer-title">Company</h4>
+          <ul class="ats-footer-links">
+            <li class="ats-footer-link"><a href="about.html">About Us</a></li>
+            <li class="ats-footer-link"><a href="#">Contact</a></li>
+            <li class="ats-footer-link"><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="ats-footer-bottom">
+        <p>&copy; 2026 AI ATS Pro. All rights reserved.</p>
+        <div style="display:flex; gap:16px;">
+          <a href="#" style="color:var(--text-tertiary);">Twitter</a>
+          <a href="#" style="color:var(--text-tertiary);">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile CTA -->
+  <div class="ats-mobile-sticky-cta">
+    <a href="analyzer.html" class="ats-btn ats-btn-primary" style="width:100%; justify-content:center;">✦ Analyze
+      Resume</a>
+  </div>
+</body>
+
+</html>

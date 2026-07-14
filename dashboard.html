@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/charts.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/dashboard.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+<body data-page="dashboard">
+  <div id="navbarMount"></div>
+  <main id="page-dashboard" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-label">STUDENT DASHBOARD</div>
+        <h1 style="font-family:var(--fh);font-size:clamp(22px,3vw,34px);font-weight:800;margin-top:8px">Welcome back, <span class="gradient-text ats-dynamic-user-name">User</span> 👋</h1>
+        <p style="color:var(--textm);margin-top:8px;font-size:14px" class="ats-dynamic-user-email">Loading profile...</p>
+      </div>
+      <button class="btn btn-p" onclick="window.location.href='analyzer.html'">✦ Analyze New Resume</button>
+    </div>
+
+    <div class="grid4 mb28">
+      <div class="stat-card fade-in" style="border-top:2px solid rgba(16,185,129,.3)">
+        <div class="stat-icon">⚡</div>
+        <div><div class="stat-num" style="color:var(--emerald)" data-stat="latestScore">0</div><div class="stat-lbl">Latest ATS Score</div></div>
+      </div>
+      <div class="stat-card fade2" style="border-top:2px solid rgba(0,212,255,.3)">
+        <div class="stat-icon">📄</div>
+        <div><div class="stat-num" style="color:var(--cyan)" data-stat="totalAnalyses">0</div><div class="stat-lbl">Resumes Analyzed</div></div>
+      </div>
+      <div class="stat-card fade3" style="border-top:2px solid rgba(168,85,247,.3)">
+        <div class="stat-icon">🎯</div>
+        <div><div class="stat-num" style="color:var(--violetl)" data-stat="savedJobs">0</div><div class="stat-lbl">Job Matches</div></div>
+      </div>
+      <div class="stat-card fade4" style="border-top:2px solid rgba(245,158,11,.3)">
+        <div class="stat-icon">💪</div>
+        <div><div class="stat-num" style="color:var(--amber)" data-stat="profileStrength">0</div><div class="stat-lbl">Profile Strength</div><div style="font-size:11px;color:var(--textm);margin-top:4px" data-stat="trend">↑ 0</div></div>
+      </div>
+    </div>
+
+    <div class="grid2 mb28">
+      <div class="card fade-in">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📈 ATS Score History</h3>
+        <p style="font-size:12px;color:var(--textm);margin-bottom:16px">+22 points improvement in 6 months</p>
+        <div class="chart-wrap" style="height:200px"><canvas id="scoreChart"></canvas></div>
+      </div>
+      <div class="card fade2">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">🔧 Skills Breakdown</h3>
+        <p style="font-size:12px;color:var(--textm);margin-bottom:16px">Based on your latest analysis</p>
+        <div class="chart-wrap" style="height:200px"><canvas id="skillsChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid2 mb28">
+      <div class="card fade3">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 style="font-size:14px;font-weight:700;">📋 Recent Analyses</h3>
+          <a href="analyzer.html" class="btn btn-g btn-sm">Analyze New →</a>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="table">
+            <thead><tr><th>#</th><th>Resume</th><th>Domain</th><th>Score</th><th>Action</th></tr></thead>
+            <tbody id="analysesTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--textm)">Loading analyses...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card fade4">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 style="font-size:14px;font-weight:700;">💾 Saved Resumes (Builder)</h3>
+          <a href="resume-builder.html" class="btn btn-g btn-sm">Build New →</a>
+        </div>
+        <div id="savedResumesList" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="text-align:center;padding:24px;color:var(--textm);">Loading saved resumes...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card fade4" id="savedJobsSection">
+      <h3 style="font-size:14px;font-weight:700;margin-bottom:20px">💼 Recommended Jobs</h3>
+      <p style="color:var(--textm);font-size:13px;margin-bottom:16px">Analyze a resume to get personalized job recommendations</p>
+      <button class="btn btn-g btn-sm" onclick="window.location.href='jobs.html'">Browse All Jobs →</button>
+    </div>
+  </main>
+</body>
+</html>

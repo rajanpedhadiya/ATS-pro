@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Recruiter Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/recruiter.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/charts.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/recruiter.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+<body data-page="recruiter">
+  <div id="navbarMount"></div>
+  <main id="page-recruiter" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;flex-wrap:wrap;gap:16px">
+      <div>
+        <div class="section-label">RECRUITER DASHBOARD</div>
+        <h1 style="font-family:var(--fh);font-size:clamp(22px,3vw,34px);font-weight:800;margin-top:8px">Recruitment <span class="gradient-text">Command Center</span></h1>
+        <p style="color:var(--textm);margin-top:8px;font-size:14px">AI-ranked candidates · Auto skill matching · Smart shortlisting</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-g btn-sm">+ Post Job</button>
+        <button class="btn btn-v btn-sm">↓ Export CSV</button>
+      </div>
+    </div>
+
+    <div class="grid4 mb28">
+      <div class="stat-card fade-in"><div class="stat-icon">👥</div><div><div class="stat-num" style="color:var(--cyan)">127</div><div class="stat-lbl">Total Applicants</div></div></div>
+      <div class="stat-card fade2"><div class="stat-icon">⭐</div><div><div class="stat-num" style="color:var(--emerald)">34</div><div class="stat-lbl">AI Shortlisted</div></div></div>
+      <div class="stat-card fade3"><div class="stat-icon">📊</div><div><div class="stat-num" style="color:var(--violetl)">74</div><div class="stat-lbl">Avg ATS Score</div></div></div>
+      <div class="stat-card fade4"><div class="stat-icon">💼</div><div><div class="stat-num" style="color:var(--amber)">8</div><div class="stat-lbl">Open Positions</div></div></div>
+    </div>
+
+    <div class="grid2 mb28">
+      <div class="card fade-in"><h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📊 Candidates by Domain</h3><p style="font-size:12px;color:var(--textm);margin-bottom:16px">AI-classified applicant pool</p><div class="chart-wrap" style="height:220px"><canvas id="domainChart"></canvas></div></div>
+      <div class="card fade2">
+        <h3 style="font-size:14px;font-weight:700;margin-bottom:4px">📈 Application Pipeline</h3>
+        <p style="font-size:12px;color:var(--textm);margin-bottom:16px">Candidate flow by stage</p>
+        <div id="pipelineChart">
+          <div class="pipeline-row"><div class="pipeline-label"><span style="color:var(--textd)">Applied</span><span class="mono" style="color:#00d4ff">127</span></div><div class="progress-bar"><div class="progress-fill" style="width:100%;background:#00d4ff"></div></div></div>
+          <div class="pipeline-row"><div class="pipeline-label"><span style="color:var(--textd)">AI Screened</span><span class="mono" style="color:#a855f7">89</span></div><div class="progress-bar"><div class="progress-fill" style="width:70%;background:#a855f7"></div></div></div>
+          <div class="pipeline-row"><div class="pipeline-label"><span style="color:var(--textd)">Shortlisted</span><span class="mono" style="color:#10b981">34</span></div><div class="progress-bar"><div class="progress-fill" style="width:27%;background:#10b981"></div></div></div>
+          <div class="pipeline-row"><div class="pipeline-label"><span style="color:var(--textd)">Interview</span><span class="mono" style="color:#f59e0b">12</span></div><div class="progress-bar"><div class="progress-fill" style="width:9%;background:#f59e0b"></div></div></div>
+          <div class="pipeline-row"><div class="pipeline-label"><span style="color:var(--textd)">Hired</span><span class="mono" style="color:#f43f5e">4</span></div><div class="progress-bar"><div class="progress-fill" style="width:3%;background:#f43f5e"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card fade3">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <h3 style="font-size:14px;font-weight:700">🏆 AI-Ranked Candidates</h3>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="candidateSearch" placeholder="🔍 Search candidates..." style="width:200px;padding:8px 12px;font-size:13px">
+          <div class="filter-tabs" id="filterTabs">
+            <button class="filter-tab active" data-filter-tab="All">All</button>
+            <button class="filter-tab" data-filter-tab="Web Dev">Web Dev</button>
+            <button class="filter-tab" data-filter-tab="AI/ML">AI/ML</button>
+            <button class="filter-tab" data-filter-tab="Data Sci">Data Sci</button>
+            <button class="filter-tab" data-filter-tab="Cybersec">Cybersec</button>
+            <button class="filter-tab" data-filter-tab="Design">Design</button>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="table" id="candidateTable">
+          <thead><tr><th>#</th><th>Candidate</th><th>Role</th><th>Domain</th><th>Exp</th><th>ATS Score</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="candidateBody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <span id="candidateCount" style="font-size:13px;color:var(--textm)">Showing 6 of 6 candidates</span>
+        <div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" style="background:var(--cyan2);border-color:rgba(0,212,255,.3);color:var(--cyan)">1</button><button class="btn btn-g btn-sm">2</button><button class="btn btn-g btn-sm">3</button></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

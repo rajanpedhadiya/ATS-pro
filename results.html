@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/links.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/animations.js" defer></script>
+  <script src="js/charts.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/link-extractor.js" defer></script>
+  <script src="js/results.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+<body data-page="results" style="background: var(--bg-tertiary);">
+  <div id="navbarMount"></div>
+  
+  <main id="page-results" class="ats-section animate-fade-up" style="padding-top: 100px; min-height: 100vh;">
+    <div class="ats-container" style="max-width: 1000px;">
+      <!-- Non-destructive wrapper around the legacy JS injection point -->
+      <div class="ats-results-wrapper ats-legacy-results-styler" id="resultsContent"></div>
+    </div>
+  </main>
+
+  <footer class="ats-footer mt-xxl">
+    <div class="ats-container text-center" style="color: var(--text-tertiary); font-size: 13px;">
+      &copy; 2026 AI ATS Pro. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

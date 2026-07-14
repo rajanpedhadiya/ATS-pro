@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – Resume Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/preview.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" defer></script>
+  
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/animations.js" defer></script>
+  <script src="js/ui-effects.js" defer></script>
+  <script src="js/charts.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/services/jobs.js" defer></script>
+  <script src="js/analyzer.js" defer></script>
+  <script src="js/resume-preview.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="auth/session.js" defer></script>
+</head>
+<body data-page="analyzer" style="background: var(--aurora-bg);">
+  <div id="navbarMount"></div>
+
+  <main id="page-analyzer" class="ats-section animate-fade-up" style="padding-top: 100px; min-height: 100vh;">
+    <div class="ats-container" style="max-width: 1200px;">
+      
+      <div class="text-center mb-xl">
+        <div class="ats-section-label">RESUME ANALYZER</div>
+        <h1 class="ats-section-title">AI-Powered <span class="ats-gradient-text">Resume Analysis</span></h1>
+        <p class="ats-subtitle">Paste or upload your resume, optionally add a job description, and get an instant ATS score with actionable AI feedback.</p>
+      </div>
+
+      <div class="ats-analyzer-layout">
+        
+        <!-- Left: Main Dashboard Card -->
+        <div class="ats-analyzer-card animate-scale-in delay-100">
+          <!-- AI Loading Overlay -->
+          <div id="aiLoadingOverlay" class="ats-loading-overlay">
+            <div class="ats-pulse-orb">✦</div>
+            <div class="ats-loading-text" id="aiLoadingText">Analyzing Resume...</div>
+            <div class="ats-loading-subtext">Powered by Gemini AI</div>
+            <div class="ats-progress-container">
+              <div class="ats-progress-bar" id="aiProgressBar"></div>
+            </div>
+          </div>
+
+          <div class="ats-input-group">
+            <div class="ats-input-header">
+              <h3 class="ats-input-title">
+                <span style="font-size:18px;">📄</span> Resume Content <span style="font-size:12px; font-weight:400; color:var(--text-tertiary);">(required)</span>
+              </h3>
+              <div class="ats-upload-zone">
+                <button class="ats-btn ats-btn-secondary" style="padding: 8px 16px; font-size: 13px;" id="sampleResumeBtn">📋 Load Sample</button>
+                <button class="ats-btn ats-btn-primary" style="padding: 8px 16px; font-size: 13px;" onclick="document.getElementById('fileInput').click()">↑ Upload File</button>
+                <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" style="display:none">
+              </div>
+            </div>
+            
+            <textarea id="resumeInput" class="ats-textarea" placeholder="Paste your resume text here...&#10;&#10;Include: Contact info, Work experience, Education, Skills, Projects &amp; certifications" style="min-height: 280px;"></textarea>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+              <span id="charCount" style="font-size: 12px; color: var(--text-tertiary);">0 characters</span>
+              <button style="color: #f43f5e; font-size: 12px; font-weight: 600; cursor: pointer; background: none; border: none;" onclick="document.getElementById('resumeInput').value=''; document.getElementById('charCount').textContent='0 characters'; window.ATSPreview && window.ATSPreview.clearPreview();">✕ Clear</button>
+            </div>
+          </div>
+
+          <div class="ats-input-group mt-md">
+            <h3 class="ats-input-title mb-sm">
+              <span style="font-size:18px;">🎯</span> Job Description <span style="font-size:12px; font-weight:400; color:var(--text-tertiary);">(Optional — for match %)</span>
+            </h3>
+            <textarea id="jdInput" class="ats-textarea" placeholder="Paste the job description here to get a match percentage and missing keywords..." style="min-height: 140px;"></textarea>
+          </div>
+
+          <div id="analyzeError" class="ats-error-alert" style="display:none;"></div>
+
+          <button id="analyzeBtn" class="ats-btn ats-btn-primary animate-glow" style="width:100%; padding: 16px; font-size: 16px; margin-top: var(--space-md);">
+            ✦ Analyze Resume with AI
+          </button>
+          
+          <p style="text-align:center; font-size:12px; color:var(--text-tertiary); margin-top:16px;">
+            🔒 Your resume data is not stored. Analyzed securely in real-time.
+          </p>
+        </div>
+
+        <!-- Right: Live Preview Panel -->
+        <div class="ats-preview-card animate-scale-in delay-200">
+          <div class="ats-preview-header">
+            <div style="display:flex; align-items:center; gap: 12px;">
+              <div class="ats-preview-icon" id="previewIcon">📄</div>
+              <div>
+                <h3 class="ats-preview-title" id="previewFilename">No file selected</h3>
+                <p class="ats-preview-meta" id="previewMeta">Upload a file to preview</p>
+              </div>
+            </div>
+            <div class="ats-preview-actions" id="previewActions" style="display:none;">
+              <button class="ats-icon-btn" id="previewZoomOut" title="Zoom Out">−</button>
+              <button class="ats-icon-btn" id="previewZoomIn" title="Zoom In">+</button>
+              <button class="ats-icon-btn" id="previewFullscreen" title="Fullscreen">⛶</button>
+            </div>
+          </div>
+
+          <div class="ats-preview-body" id="previewBody">
+            <div class="ats-preview-empty">
+              <div style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;">👀</div>
+              <p>Live resume preview will appear here.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="ats-footer mt-xxl">
+    <div class="ats-container text-center" style="color: var(--text-tertiary); font-size: 13px;">
+      &copy; 2026 AI ATS Pro. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    if (!localStorage.getItem('ats_session')) {
+      window.location.href = 'auth/login.html';
+    }
+  </script>
+  <script>
+    (function() {
+      const t = localStorage.getItem('ats_theme') || 'aurora-pink';
+      const f = localStorage.getItem('ats_font') || 'modern-saas';
+      document.documentElement.setAttribute('data-theme', t);
+      document.documentElement.setAttribute('data-font', f);
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ATS Pro – My Profile</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/profile.css">
+
+  <script src="js/main.js" defer></script>
+  <script src="js/navigation.js" defer></script>
+  <script src="js/services/storage.js" defer></script>
+  <script src="auth/session.js" defer></script>
+  <script src="js/theme-switcher.js" defer></script>
+  <script src="js/profile.js" defer></script>
+</head>
+<body data-page="profile">
+  <div id="navbarMount"></div>
+  
+  <main id="page-profile" class="page">
+    <div style="margin-bottom:36px;">
+      <div class="section-label">MY PROFILE</div>
+      <h1 style="font-family:var(--fh);font-size:clamp(24px,3vw,36px);font-weight:800;margin-top:8px">Account <span class="gradient-text">Settings</span></h1>
+    </div>
+
+    <div class="profile-grid">
+      <!-- Left Column: Header & Security -->
+      <div class="profile-col-left">
+        
+        <div class="card profile-header-card fade-in">
+          <div class="avatar-container">
+            <div id="profileAvatarPreview" class="avatar-preview"></div>
+            <label class="avatar-upload-btn">
+              <span>📷 Update</span>
+              <input type="file" id="avatarInput" accept="image/jpeg, image/png, image/webp" style="display:none;">
+            </label>
+          </div>
+          <div class="profile-info">
+            <h2 id="profileNameDisplay" style="font-size:20px;font-weight:700;margin-bottom:4px;">User</h2>
+            <p id="profileEmailDisplay" style="color:var(--textm);font-size:14px;margin-bottom:12px;">user@example.com</p>
+            <div class="badge bc" style="font-size:11px;" id="profileJoinDateDisplay">Joined Date</div>
+          </div>
+          <div style="width:100%;margin-top:24px;">
+            <div class="input-group">
+              <label>Full Name</label>
+              <input type="text" id="editNameInput" class="form-input">
+            </div>
+            <button id="saveProfileBtn" class="btn btn-p w100" style="margin-top:12px;">Save Profile</button>
+          </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top:24px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">Security & Account</h3>
+          <div class="input-group">
+            <label>New Password</label>
+            <input type="password" id="editPasswordInput" class="form-input" placeholder="Leave blank to keep current">
+          </div>
+          <button id="savePasswordBtn" class="btn btn-g" style="margin-bottom:24px;">Update Password</button>
+          
+          <div style="border-top:1px solid var(--border);padding-top:20px;display:flex;gap:12px;">
+            <button class="btn" style="background:transparent;border:1px solid var(--border);color:var(--text);" onclick="window.ATSUser.logout()">Log Out</button>
+            <button class="btn" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);color:#f43f5e;" onclick="if(confirm('Are you sure you want to completely delete your account? This cannot be undone.')) window.ATSUser.deleteAccount()">Delete Account</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Stats & Preferences -->
+      <div class="profile-col-right">
+        
+        <div class="card fade-in">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">ATS Analytics</h3>
+          <div class="grid3">
+            <div class="stat-card" style="border-top:2px solid rgba(16,185,129,.3);padding:16px;">
+              <div style="font-size:24px;font-weight:800;color:var(--emerald);" id="statTotalAnalyses">0</div>
+              <div style="font-size:12px;color:var(--textm);">Resumes Analyzed</div>
+            </div>
+            <div class="stat-card" style="border-top:2px solid rgba(0,212,255,.3);padding:16px;">
+              <div style="font-size:24px;font-weight:800;color:var(--cyan);" id="statAverageScore">0</div>
+              <div style="font-size:12px;color:var(--textm);">Average Score</div>
+            </div>
+            <div class="stat-card" style="border-top:2px solid rgba(168,85,247,.3);padding:16px;">
+              <div style="font-size:24px;font-weight:800;color:var(--violetl);" id="statHighestScore">0</div>
+              <div style="font-size:12px;color:var(--textm);">Highest Score</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top:24px;">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">UI Preferences</h3>
+          <p style="font-size:13px;color:var(--textm);margin-bottom:20px;">Personalize your environment. These settings will automatically sync whenever you log in.</p>
+          
+          <div class="input-group" style="margin-bottom:20px;">
+            <label style="margin-bottom:8px;display:block;font-size:13px;font-weight:600;color:var(--text);">Color Theme</label>
+            <div class="theme-selection-grid" id="profileThemeGrid">
+              <!-- JS injected -->
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label style="margin-bottom:8px;display:block;font-size:13px;font-weight:600;color:var(--text);">Typography Style</label>
+            <select id="profileFontSelect" class="form-input">
+              <option value="modern-saas">Modern SaaS (Inter/Poppins)</option>
+              <option value="futuristic-ai">Futuristic AI (Space Grotesk/Orbitron)</option>
+              <option value="premium-corporate">Premium Corporate (Sora/Manrope)</option>
+              <option value="elegant-minimal">Elegant Minimal (Outfit/DM Sans)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card fade-in" style="margin-top:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="font-size:15px;font-weight:700;">💾 Saved Resumes</h3>
+            <a href="resume-builder.html" class="btn btn-g btn-sm">Build New →</a>
+          </div>
+          <div id="profileSavedResumesList" style="display:flex; flex-direction:column; gap:12px;">
+            <div style="text-align:center;padding:24px;color:var(--textm);">Loading saved resumes...</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</body>
+</html>
